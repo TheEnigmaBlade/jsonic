@@ -19,7 +19,7 @@ public class SpeedTest
 	public static void main(String[] args)
 	{
 		final String json = getLongJson();
-		final int numTests = 10000;
+		final int numTests = 100;
 		
 		System.out.println("Num tests: "+numTests);
 		
@@ -152,15 +152,16 @@ public class SpeedTest
 				
 				long startTime = 0;
 				
-				try
-				{
-					Method m = SpeedTest.class.getMethod("test_JSONicDelayed", String.class);
+				/*try
+				{*/
+					//Method m = SpeedTest.class.getMethod("test_JSONicDelayed", String.class);
 					
 					startTime = System.nanoTime();
 					
 					for(int n = 0; n < numTests; n++)
-						m.invoke(this, json);
-				}
+						test_JSONicDelayed(json);
+						//m.invoke(this, json);
+				/*}
 				catch(NoSuchMethodException | SecurityException e)
 				{
 					System.err.println("Failed to get method");
@@ -174,7 +175,7 @@ public class SpeedTest
 					e.printStackTrace();
 					set(-1l);
 					return;
-				}
+				}*/
 				
 				//long startTime = System.nanoTime();
 				
@@ -200,7 +201,7 @@ public class SpeedTest
 		
 		//Randomize test start order (to be fair)
 		List<FutureTask<?>> tasks = new ArrayList<>(4);
-		Collections.addAll(tasks, new FutureTask<?>[]{task_jsonSimple, task_lolRTMPS, task_quickJson, task_jsonic, task_jsonicDelayed});
+		Collections.addAll(tasks, new FutureTask<?>[]{task_jsonSimple, /*task_lolRTMPS,*/ task_quickJson, task_jsonic, task_jsonicDelayed});
 		Collections.shuffle(tasks);
 		
 		//Start computations
@@ -214,7 +215,7 @@ public class SpeedTest
 			double resultJsonic = task_jsonic.get();
 			double resultQuickJson = task_quickJson.get();
 			double resultJsonSimple = task_jsonSimple.get();
-			double resultLoLRTMPS = task_lolRTMPS.get();
+			//double resultLoLRTMPS = task_lolRTMPS.get();
 			
 			System.out.println("\n------------------------------");
 			
@@ -230,11 +231,11 @@ public class SpeedTest
 			double percentFasterDelayed3 = ((resultQuickJson-resultJsonicDelayed)/resultQuickJson)*100;
 			System.out.println("JSONic in delayed mode is "+format.format(percentFasterDelayed3)+"% faster");
 			
-			System.out.println("\nCompared to LoL RTMPS:");
+			/*System.out.println("\nCompared to LoL RTMPS:");
 			double percentFaster2 = ((resultLoLRTMPS-resultJsonic)/resultLoLRTMPS)*100;
 			System.out.println("JSONic in normal mode is "+format.format(percentFaster2)+"% faster");
 			double percentFasterDelayed2 = ((resultLoLRTMPS-resultJsonicDelayed)/resultLoLRTMPS)*100;
-			System.out.println("JSONic in delayed mode is "+format.format(percentFasterDelayed2)+"% faster");
+			System.out.println("JSONic in delayed mode is "+format.format(percentFasterDelayed2)+"% faster");*/
 		}
 		catch(Exception e)
 		{
@@ -250,14 +251,15 @@ public class SpeedTest
 		{
 			Object o = parser.parse(json);
 			JSONObject obj = (JSONObject)o;
-			JSONObject data = (JSONObject)obj.get("data");
+			JSONArray data = (JSONArray)obj.get("data");
+			/*JSONObject data = (JSONObject)obj.get("data");
 			for(Object championKey : data.keySet())
 			{
 				JSONObject champion = (JSONObject)data.get(championKey);
 				JSONObject image = (JSONObject)champion.get("image");
 				String full = (String)image.get("full");
 				full.hashCode();
-			}
+			}*/
 		}
 		catch(ParseException e)
 		{
@@ -292,14 +294,14 @@ public class SpeedTest
 		JsonParserFactory factory = JsonParserFactory.getInstance();
 		com.json.parsers.JSONParser parser=factory.newJsonParser();
 		Map obj = parser.parseJson(json);
-		Map data = (Map)obj.get("data");
+		/*Map data = (Map)obj.get("data");
 		for(Object championKey : data.keySet())
 		{
 			Map champion = (Map)data.get(championKey);
 			Map image = (Map)champion.get("image");
 			String full = (String)image.get("full");
 			full.hashCode();
-		}
+		}*/
 	}
 	
 	private static void test_JSONic(String json)
@@ -307,14 +309,15 @@ public class SpeedTest
 		try
 		{
 			JsonObject obj = JsonParser.parseObject(json, false);
-			JsonObject data = obj.getObject("data");
+			JsonArray data = obj.getArray("data");
+			/*JsonObject data = obj.getObject("data");
 			for(String championKey : data.keySet())
 			{
 				JsonObject champion = data.getObject(championKey);
 				JsonObject image = champion.getObject("image");
 				String full = image.getString("full");
 				full.hashCode();
-			}
+			}*/
 		}
 		catch(JsonException e)
 		{
@@ -327,14 +330,15 @@ public class SpeedTest
 		try
 		{
 			JsonObject obj = JsonParser.parseObject(json, true);
-			JsonObject data = obj.getObject("data");
+			JsonArray data = obj.getArray("data");
+			/*JsonObject data = obj.getObject("data");
 			for(String championKey : data.keySet())
 			{
 				JsonObject champion = data.getObject(championKey);
 				JsonObject image = champion.getObject("image");
 				String full = image.getString("full");
 				full.hashCode();
-			}
+			}*/
 		}
 		catch(JsonException e)
 		{
@@ -349,9 +353,11 @@ public class SpeedTest
 		return "{\"data\":{\"Ahri\":{\"image\":{\"full\": \"Ahri.png\"}}}}";
 	}
 	
+	private static final String longFile = "heug.json";
+	
 	private static String getLongJson()
 	{
-		try(Scanner scanner = new Scanner(new File("test_libs/champion.json")))
+		try(Scanner scanner = new Scanner(new File("test_libs/"+longFile)))
 		{
 			StringBuilder s = new StringBuilder();
 			while(scanner.hasNextLine())

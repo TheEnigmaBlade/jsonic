@@ -4,6 +4,13 @@ import java.util.*;
 
 import net.enigmablade.jsonic.ValueUtil.*;
 
+/**
+ * <p>An unordered collection or key-value pairings.<p>
+ * <p>Basic format:</p>
+ * <code>{ "key":"value", "required":"Hello World!" }</code>
+ * 
+ * @author Enigma
+ */
 public class JsonObject extends JsonElement
 {
 	//Object data
@@ -60,7 +67,10 @@ public class JsonObject extends JsonElement
 	 */
 	private void setup()
 	{
-		values = new HashMap<>();
+		if(values == null)
+			values = new HashMap<>();
+		else
+			values.clear();
 	}
 	
 	/**
@@ -73,51 +83,56 @@ public class JsonObject extends JsonElement
 	@Override
 	protected int parse(String json, int startIndex, boolean delayed) throws JsonParseException
 	{
+		//Verify all required data structures exist
 		setup();
 		
-		//System.out.println("Parsing object (delayed="+delayed+"): "+json+", starting at "+startIndex);
-		
+		//Verify what is being parsed is indeed an object
 		if(json.charAt(startIndex) != ParserUtil.OBJECT_OPEN)
 			throw new JsonParseException(JsonParseException.Type.INVALID_FORMAT, 0);
 		
 		int index = startIndex+1;
+		boolean seenObj = false;
 		do
 		{
 			//Move to the start of the next key
 			index = ParserUtil.nextNonWhitespace(json, index);
-			//System.out.println("\tKey start index: "+startIndex);
 			
 			//Get information on the key type
 			char startChar = json.charAt(index);
-			//System.out.println("\tKey start char: "+startChar);
 			
-			//End of the object
-			if(startChar == ParserUtil.OBJECT_CLOSE)
-				break;
-			//Or break point
-			else if(startChar == ParserUtil.SPLIT)
+			//Make sure it's an allowable character
+			///Separation point (',')
+			if(startChar == ParserUtil.SPLIT)
 			{
 				index = ParserUtil.nextNonWhitespace(json, index+1);
 				startChar = json.charAt(index);
 			}
+			///Or end of the object ('}')
+			else if(startChar == ParserUtil.OBJECT_CLOSE)
+			{
+				break;
+			}
+			///Or someone is bad at formatting their JSON!
+			else if(seenObj)
+			{
+				throw new JsonParseException(JsonParseException.Type.INVALID_CHAR, index, startChar);
+			}
+			
 			
 			//Get the key
 			String key;
-			//String type
+			///String type
 			if(ParserUtil.isStringChar(startChar))
 			{
-				//System.out.println("\tKey is string");
 				key = ParserUtil.getStringBlock(json, index);
 				index += key.length()+2;
 			}
-			//Unknown type
+			///Unknown type
 			else
 			{
-				//System.out.println("\tKey is unknown");
 				key = ParserUtil.getUnknownBlock(json, index);
 				index += key.length();
 			}
-			//System.out.println("\tKey: "+key);
 			
 			//Move to the start of the value
 			if(json.charAt(index) != ParserUtil.OBJECT_MAP)
@@ -127,30 +142,24 @@ public class JsonObject extends JsonElement
 					throw new JsonParseException(JsonParseException.Type.INVALID_FORMAT, index);
 			}
 			index = ParserUtil.nextNonWhitespace(json, index+1);
-			//System.out.println("\tValue start index: "+index);
 			
 			//Get the value and store it
 			startChar = json.charAt(index);
-			//System.out.println("\tValue start char: "+startChar);
 			
+			//Parse the value based on type
 			Value value = null;
 			switch(startChar)
 			{
 				//String
 				case ParserUtil.STRING_1: 
 				case ParserUtil.STRING_2: 
-					//System.out.println("\tValue is string");
 					String str = ParserUtil.getStringBlock(json, index);
-					//System.out.println("\tValue str: "+str);
 					value = ValueUtil.createValue(str);
 					index += str.length()+2;
 					break;
 				
 				//Object
 				case ParserUtil.OBJECT_OPEN: 
-					//System.out.println("\tValue is object");
-					//String objectStr = ParserUtil.getObjectBlock(json, index);
-					//System.out.println("\tValue str: "+objectStr);
 					JsonObject object = new JsonObject(json, index, delayed);
 					value = ValueUtil.createValue(object);
 					index += object.getRawLength();
@@ -158,55 +167,29 @@ public class JsonObject extends JsonElement
 				
 				//Array
 				case ParserUtil.ARRAY_OPEN: 
-					//System.out.println("\tValue is array");
-					//String arrayStr = ParserUtil.getArrayBlock(json, index);
-					//System.out.println("\tValue str: "+arrayStr);
 					JsonArray array = new JsonArray(json, index, delayed);
 					value = ValueUtil.createValue(array);
 					index += array.getRawLength();
 					break;
 				
-				//Unknown
+				//Unknown: boolean, number, or null
 				default: 
-					//System.out.println("\tValue is unknown");
 					String valueStr = ParserUtil.getUnknownBlock(json, index);
-					//System.out.println("\tValue str: "+valueStr);
-					
-					index += valueStr.length();
-					
 					value = ParserUtil.parseUnknown(valueStr);
+					index += valueStr.length();
 			}
-			//System.out.println("\tValue: "+value);
 			
 			//Add the value
 			values.put(key, value);
-			//System.out.println(values);
+			seenObj = true;
 			
 		}while(index < json.length()-1);
 		
+		//Check the very last character to make sure the object was closed
 		if(json.charAt(index) != ParserUtil.OBJECT_CLOSE)
 			throw new JsonParseException(JsonParseException.Type.BAD_END, index);
 		
 		return index-startIndex+1;
-	}
-	
-	protected int getRawLength(String json, int startIndex)
-	{
-		char c;
-		int n = 1;
-		for(int objCount = 0; startIndex < json.length(); startIndex++, n++)
-		{
-			c = json.charAt(startIndex);
-			
-			if(c == ParserUtil.OBJECT_CLOSE)
-				objCount--;
-			else if(c == ParserUtil.OBJECT_OPEN)
-				objCount++;
-			
-			if(objCount <= 0)
-				break;
-		}
-		return n;
 	}
 	
 	/********************
@@ -230,15 +213,7 @@ public class JsonObject extends JsonElement
 	public void put(String key, Object value) throws JsonException
 	{
 		verifyParseState();
-		
-		Value newValue;
-		
-		if(value == null)
-			newValue = ValueUtil.createNullValue();
-		else
-			newValue = ValueUtil.createValue(value);
-		
-		values.put(key, newValue);
+		values.put(key, ValueUtil.createValue(value));
 	}
 	
 	public void put(String key, JsonObject value) throws JsonException

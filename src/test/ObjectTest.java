@@ -151,6 +151,7 @@ public class ObjectTest
 		}
 		catch(JsonParseException e)
 		{
+			e.printStackTrace();
 			previousError = e.getMessage();
 			return null;
 		}

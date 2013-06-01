@@ -100,14 +100,16 @@ public abstract class JsonElement
 	 * Parsing helper methods *
 	 **************************/
 	
+	/**
+	 * Returns the raw length of this element (the length of the original string).
+	 * @return The raw length
+	 */
 	protected int getRawLength()
 	{
-		if(length > -1)
-			return length;
-		return length = getRawLength(delayedString, delayedIndex);
+		return length;
 	}
 	
-	protected abstract int getRawLength(String json, int startIndex);
+	//protected abstract int getRawLength(String json, int startIndex);
 	
 	/**
 	 * Verifies this element is parsed and otherwise parses it.
@@ -135,6 +137,10 @@ public abstract class JsonElement
 	 * Object to JSON methods *
 	 **************************/
 	
+	/**
+	 * Returns this element and its contents in JSON format.
+	 * @return The JSON formatted element
+	 */
 	@Override
 	public String toString()
 	{
@@ -146,5 +152,9 @@ public abstract class JsonElement
 		}
 	}
 	
+	/**
+	 * Returns this element and its contents in JSON format.
+	 * @return The JSON formatted element
+	 */
 	public abstract String getJSON();
 }

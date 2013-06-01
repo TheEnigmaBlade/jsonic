@@ -150,30 +150,8 @@ public class ParserUtil
 				break;
 			
 			//A number
+			//TODO - Possible future optimizations: check if a number and long/double at the same time
 			default:
-				/*boolean isNumeric = true, isFloating = false;
-				for(int n = 0; n < str.length(); n++)
-				{
-					char c = str.charAt(n);
-					if((c == '-' && n != 0) || c < '0' || c > '9' || (c == '.' && isFloating))
-					{
-						isNumeric = false;
-						break;
-					}
-					if(c == '.')
-						isFloating = true;
-				}
-				if(isNumeric)
-				{
-					if(isFloating)
-					{
-						double value = Double.parseDouble(str);
-						return ValueUtil.createValue(value);
-					}
-					long value = Long.parseLong(str);
-					return ValueUtil.createValue(value);
-				}*/
-				
 				if(isLong(str))
 				{
 					long value = Long.parseLong(str);

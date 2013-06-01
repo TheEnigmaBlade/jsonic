@@ -3,6 +3,13 @@ package net.enigmablade.jsonic;
 import java.util.*;
 import net.enigmablade.jsonic.ValueUtil.*;
 
+/**
+ * <p>An ordered sequence of values.<p>
+ * <p>Basic format:</p>
+ * <code>[ "value", "Hello World!" ]</code>
+ * 
+ * @author Enigma
+ */
 public class JsonArray extends JsonElement
 {
 	//Array data
@@ -72,34 +79,37 @@ public class JsonArray extends JsonElement
 	@Override
 	protected int parse(String json, int startIndex, boolean delayed) throws JsonParseException
 	{
+		//Verify all required data structures exist
 		setup();
 		
-		//System.out.println("Parsing array (delayed="+delayed+"): "+json+", starting at "+startIndex);
-		
+		//Verify what is being parsed is indeed an array
 		if(json.charAt(startIndex) != ParserUtil.ARRAY_OPEN)
 			throw new JsonParseException(JsonParseException.Type.INVALID_FORMAT, 0);
 		
 		int index = startIndex+1;
+		boolean seenObj = false;
 		do
 		{
 			//Move to the start of the next value
 			index = ParserUtil.nextNonWhitespace(json, index);
-			//System.out.println("\tValue start index: "+startIndex);
 			
 			//Get information on the value type
 			char startChar = json.charAt(index);
-			//System.out.println("\tValue start char: "+startChar);
 			
-			//End of the object
-			if(startChar == ParserUtil.ARRAY_CLOSE)
-				break;
-			//Or break point
-			else if(startChar == ParserUtil.SPLIT)
+			//Make sure it's an allowable character
+			///Separation point (',')
+			if(startChar == ParserUtil.SPLIT)
 			{
 				index = ParserUtil.nextNonWhitespace(json, index+1);
 				startChar = json.charAt(index);
 			}
-			else if(startChar == ParserUtil.OBJECT_MAP)
+			///End of array (']')
+			else if(startChar == ParserUtil.ARRAY_CLOSE)
+			{
+				break;
+			}
+			///Or someone is bad at formatting their JSON!
+			else if(seenObj)
 			{
 				throw new JsonParseException(JsonParseException.Type.INVALID_CHAR, index, startChar);
 			}
@@ -111,18 +121,13 @@ public class JsonArray extends JsonElement
 				//String
 				case ParserUtil.STRING_1: 
 				case ParserUtil.STRING_2: 
-					//System.out.println("\tValue is string");
 					String str = ParserUtil.getStringBlock(json, index);
-					//System.out.println("\tValue str: "+str);
 					value = ValueUtil.createValue(str);
 					index += str.length()+2;
 					break;
 				
 				//Object
 				case ParserUtil.OBJECT_OPEN: 
-					//System.out.println("\tValue is object");
-					//String objectStr = ParserUtil.getObjectBlock(json, index);
-					//System.out.println("\tValue str: "+objectStr);
 					JsonObject object = new JsonObject(json, index, delayed);
 					value = ValueUtil.createValue(object);
 					index += object.getRawLength();
@@ -130,54 +135,29 @@ public class JsonArray extends JsonElement
 				
 				//Array
 				case ParserUtil.ARRAY_OPEN: 
-					//System.out.println("\tValue is array");
-					//String arrayStr = ParserUtil.getArrayBlock(json, index);
-					//System.out.println("\tValue str: "+arrayStr);
 					JsonArray array = new JsonArray(json, index, delayed);
 					value = ValueUtil.createValue(array);
 					index += array.getRawLength();
 					break;
 				
-				//Unknown
+				//Unknown: boolean, number, or null
 				default: 
-					//System.out.println("\tValue is unknown");
 					String valueStr = ParserUtil.getUnknownBlock(json, index);
-					//System.out.println("\tValue str: "+valueStr);
-					
-					index += valueStr.length();
-					
 					value = ParserUtil.parseUnknown(valueStr);
+					index += valueStr.length();
 			}
-			//System.out.println("\tValue: "+value);
 			
 			//Add the value
 			values.add(value);
+			seenObj = true;
 			
 		}while(index < json.length()-1);
 		
+		//Check the very last character to make sure the object was closed
 		if(json.charAt(index) != ParserUtil.ARRAY_CLOSE)
 			throw new JsonParseException(JsonParseException.Type.BAD_END, index);
 		
 		return index-startIndex+1;
-	}
-	
-	protected int getRawLength(String json, int startIndex)
-	{
-		char c;
-		int n = 1;
-		for(int objCount = 0; startIndex < json.length(); startIndex++, n++)
-		{
-			c = json.charAt(startIndex);
-			
-			if(c == ParserUtil.ARRAY_CLOSE)
-				objCount--;
-			else if(c == ParserUtil.ARRAY_OPEN)
-				objCount++;
-			
-			if(objCount <= 0)
-				break;
-		}
-		return n;
 	}
 	
 	/********************
@@ -189,6 +169,60 @@ public class JsonArray extends JsonElement
 		verifyParseState();
 		
 		return values.size();
+	}
+	
+	public void add(String key, Object value) throws JsonException
+	{
+		verifyParseState();
+		values.add(ValueUtil.createValue(value));
+	}
+	
+	public void add(String key, JsonObject value) throws JsonException
+	{
+		verifyParseState();
+		values.add(ValueUtil.createValue(value));
+	}
+	
+	public void add(String key, JsonArray value) throws JsonException
+	{
+		verifyParseState();
+		values.add(ValueUtil.createValue(value));
+	}
+	
+	public void add(String key, String value) throws JsonException
+	{
+		verifyParseState();
+		values.add(ValueUtil.createValue(value));
+	}
+	
+	public void add(String key, long value) throws JsonException
+	{
+		verifyParseState();
+		values.add(ValueUtil.createValue(value));
+	}
+	
+	public void add(String key, int value) throws JsonException
+	{
+		verifyParseState();
+		values.add(ValueUtil.createValue(value));
+	}
+	
+	public void add(String key, double value) throws JsonException
+	{
+		verifyParseState();
+		values.add(ValueUtil.createValue(value));
+	}
+	
+	public void add(String key, float value) throws JsonException
+	{
+		verifyParseState();
+		values.add(ValueUtil.createValue(value));
+	}
+	
+	public void add(String key, boolean value) throws JsonException
+	{
+		verifyParseState();
+		values.add(ValueUtil.createValue(value));
 	}
 	
 	public Object get(int index) throws JsonException
