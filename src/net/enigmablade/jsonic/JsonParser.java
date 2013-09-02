@@ -3,19 +3,122 @@ package net.enigmablade.jsonic;
 import java.io.*;
 import java.nio.charset.*;
 
+/**
+ * <p>The entry point for JSON parsing.<p>
+ * <p>Two methods are provided for using the parser: static parsing methods and non-static processing methods.
+ * Both are functionally equivalent and the use of either one is dependent on the user's coding style.<p>
+ * 
+ * @author Enigma
+ */
 public class JsonParser
 {
+	/******************************
+	 * Non-static parsing methods *
+	 ******************************/
+	
+	private boolean delayed;
+	
+	/**
+	 * Creates a new instance of a non-delayed parser.
+	 */
+	public JsonParser()
+	{
+		delayed = false;
+	}
+	
+	/**
+	 * Creates a new instances of a parser that can be delayed.
+	 * @param delayed Whether or not to delay parsing
+	 */
+	public JsonParser(boolean delayed)
+	{
+		this.delayed = delayed;
+	}
+	
+	//Basic string methods
+	
+	/**
+	 * Parses the given JSON using the parser settings.
+	 * @param json The JSON
+	 * @return A generic JSON element
+	 * @throws JsonParseException if an exception occurred during parsing
+	 */
+	public JsonElement process(String json) throws JsonParseException
+	{
+		return parse(json, delayed);
+	}
+	
+	//Input stream methods
+	
+	public JsonElement process(InputStream stream) throws JsonParseException, IOException
+	{
+		return parse(stream, delayed);
+	}
+	
+	public JsonElement process(InputStream stream, Charset charset) throws JsonParseException, IOException
+	{
+		return parse(stream, charset, delayed);
+	}
+	
+	//Object load methods
+	
+	public JsonObject processObject(String json) throws JsonParseException
+	{
+		return parseObject(json, delayed);
+	}
+	
+	public JsonObject processObject(InputStream stream) throws JsonParseException, IOException
+	{
+		return parseObject(stream, delayed);
+	}
+	
+	public JsonObject processObject(InputStream stream, Charset charset) throws JsonParseException, IOException
+	{
+		return parseObject(stream, charset, delayed);
+	}
+	
+	//Array load methods
+	
+	public JsonArray processArray(String json) throws JsonParseException
+	{
+		return parseArray(json, delayed);
+	}
+	
+	public JsonArray processArray(InputStream stream) throws JsonParseException, IOException
+	{
+		return parseArray(stream, delayed);
+	}
+	
+	public JsonArray processArray(InputStream stream, Charset charset) throws JsonParseException, IOException
+	{
+		return parseArray(stream, charset, delayed);
+	}
+	
 	/**************************
 	 * Static parsing methods *
 	 **************************/
 	
 	//Basic string methods
 	
+	/**
+	 * Parses the given JSON.
+	 * @param json The JSON
+	 * @return A generic JSON element
+	 * @throws JsonParseException if an exception occurred during parsing
+	 */
 	public static JsonElement parse(String json) throws JsonParseException
 	{
 		return parse(json, false);
 	}
 	
+	/**
+	 * Parses the given JSON, which can be delayed.
+	 * Later exceptions may be thrown if parsing is delayed.
+	 * @param json The JSON
+	 * @param delayed Whether or not the parsing is delayed
+	 * @return A generic JSON element
+	 * @throws JsonParseException if an exception occurred during parsing
+	 */
 	public static JsonElement parse(String json, boolean delayed) throws JsonParseException
 	{
 		if(json == null)
@@ -120,8 +223,17 @@ public class JsonParser
 		return parseArray(readString(stream, charset), delayed);
 	}
 	
-	//Stream helper methods
+	/******************
+	 * Helper methods *
+	 ******************/
 	
+	/**
+	 * Reads the entire input stream into a string.
+	 * @param stream The stream to read
+	 * @param charset The character set to use
+	 * @return The string read from the stream
+	 * @throws IOException if the input stream couldn't be read
+	 */
 	private static String readString(InputStream stream, Charset charset) throws IOException
 	{
 		StringBuilder json = new StringBuilder();

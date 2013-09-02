@@ -1,5 +1,10 @@
 package net.enigmablade.jsonic;
 
+/**
+ * An exception thrown if there was a problem during JSON parsing.
+ * 
+ * @author Enigma
+ */
 public class JsonParseException extends JsonException
 {
 	protected enum Type { BAD_START, BAD_END, INVALID_FORMAT, INVALID_CHAR, UNKNOWN_VALUE_TYPE };
@@ -27,6 +32,10 @@ public class JsonParseException extends JsonException
 		this.thing = thing;
 	}
 	
+	/**
+	 * Returns the message associated with the exception.
+	 * @return The exception message
+	 */
 	@Override
 	public String getMessage()
 	{

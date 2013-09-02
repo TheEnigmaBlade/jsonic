@@ -21,7 +21,7 @@ public abstract class JsonElement
 	/**
 	 * Creates an empty JsonElement.
 	 */
-	protected JsonElement()
+	public JsonElement()
 	{
 		delayedString = null;
 	}
@@ -31,7 +31,7 @@ public abstract class JsonElement
 	 * @param e The element to clone
 	 * @throws IllegalArgumentException if the object is <code>null</code>
 	 */
-	protected JsonElement(JsonElement e)
+	public JsonElement(JsonElement e)
 	{
 		if(e == null)
 			throw new IllegalArgumentException("The clone argument cannot be null");
@@ -101,15 +101,23 @@ public abstract class JsonElement
 	 **************************/
 	
 	/**
-	 * Returns the raw length of this element (the length of the original string).
+	 * Returns the raw (character) length of this element (the length of the original string).
 	 * @return The raw length
 	 */
 	protected int getRawLength()
 	{
+		if(length < 0)
+			length = getRawLength(delayedString, delayedIndex);
 		return length;
 	}
 	
-	//protected abstract int getRawLength(String json, int startIndex);
+	/**
+	 * To be overridden to provide the raw (character) length of the element starting at the starting index.
+	 * @param json The JSON being checked
+	 * @param startIndex The starting index in the JSON
+	 * @return The raw length
+	 */
+	protected abstract int getRawLength(String json, int startIndex);
 	
 	/**
 	 * Verifies this element is parsed and otherwise parses it.
@@ -147,9 +155,7 @@ public abstract class JsonElement
 		if(isParsingDelayed())
 			return delayedString;
 		else
-		{
 			return getJSON();
-		}
 	}
 	
 	/**

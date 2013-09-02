@@ -4,6 +4,11 @@ import java.util.regex.*;
 
 import net.enigmablade.jsonic.ValueUtil.*;
 
+/**
+ * Non-public utilities and constants used by the parser.
+ * 
+ * @author Enigma
+ */
 public class ParserUtil
 {
 	//Format information

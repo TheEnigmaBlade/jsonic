@@ -50,7 +50,7 @@ public class ArrayTest
 			}
 		}
 		
-		//Multiple string cases
+		//Multiple strings
 		String[] multiStringCases = {"[\"value\",\"value2\"]", "[ \"value\", \"value2\" ]", "[\t\"value\",\t\"value2\"\t]", "[\n\"value\",\n\"value2\"\n]", "[\n\t\"value\",\n\t\"value2\"\n]"};
 		for(int n = 0; n < multiStringCases.length; n++)
 		{
@@ -119,19 +119,6 @@ public class ArrayTest
 		try
 		{
 			return new TestArray(objStr, false);
-		}
-		catch(JsonParseException e)
-		{
-			previousError = e.getMessage();
-			return null;
-		}
-	}
-	
-	private JsonArray testParseDelayedHelper(String objStr)
-	{
-		try
-		{
-			return new TestArray(objStr, true);
 		}
 		catch(JsonParseException e)
 		{

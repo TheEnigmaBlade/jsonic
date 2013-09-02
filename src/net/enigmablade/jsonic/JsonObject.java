@@ -1,13 +1,13 @@
 package net.enigmablade.jsonic;
 
 import java.util.*;
-
 import net.enigmablade.jsonic.ValueUtil.*;
 
 /**
  * <p>An unordered collection or key-value pairings.<p>
  * <p>Basic format:</p>
  * <code>{ "key":"value", "required":"Hello World!" }</code>
+ * <p>All access methods check the parse state of the object, so there is the possibility they may fail if parsing was delayed on invalid JSON.</p>
  * 
  * @author Enigma
  */
@@ -192,10 +192,43 @@ public class JsonObject extends JsonElement
 		return index-startIndex+1;
 	}
 	
+	/**
+	 * Returns the raw (character) length of the object, starting at the starting index.
+	 * @param json The JSON being checked
+	 * @param startIndex The starting index in the JSON
+	 * @return The length of the object
+	 * @see JsonElement#getRawLength(String, int)
+	 */
+	@Override
+	protected int getRawLength(String json, int startIndex)
+	{
+		char c;
+		
+		int n = 1;
+		for(int objCount = 0; startIndex < json.length(); startIndex++, n++)
+		{
+			c = json.charAt(startIndex);
+			
+			if(c == ParserUtil.OBJECT_CLOSE)
+				objCount--;
+			else if(c == ParserUtil.OBJECT_OPEN)
+				objCount++;
+			
+			if(objCount <= 0)
+				break;
+		}
+		return n;
+	}
+	
 	/********************
 	 * Accessor methods *
 	 ********************/
 	
+	/**
+	 * Returns the number of elements in the object, parsing the it if required.
+	 * @return The size of the object
+	 * @throws JsonException if an exception occurred during parsing
+	 */
 	public int size() throws JsonException
 	{
 		verifyParseState();
@@ -203,6 +236,23 @@ public class JsonObject extends JsonElement
 		return values.size();
 	}
 	
+	/**
+	 * Returns whether or not this object contains any keys or values.
+	 * @return <code>true</code> if it contains keys or values, otherwise <code>false</code>
+	 * @throws JsonException if an exception occurred during parsing
+	 */
+	public boolean isEmpty() throws JsonException
+	{
+		verifyParseState();
+		return values.isEmpty();
+	}
+	
+	/**
+	 * Returns the set of keys stored by this object.
+	 * @return The set of keys
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#keySet()
+	 */
 	public Set<String> keySet() throws JsonException
 	{
 		verifyParseState();
@@ -210,60 +260,138 @@ public class JsonObject extends JsonElement
 		return values.keySet();
 	}
 	
+	/**
+	 * Puts a value into this object mapped to the given key.
+	 * @param key The key
+	 * @param value The value
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#put(Object, Object)
+	 */
 	public void put(String key, Object value) throws JsonException
 	{
 		verifyParseState();
 		values.put(key, ValueUtil.createValue(value));
 	}
 	
+	/**
+	 * Puts a JsonObject into this object mapped to the given key.<br>
+	 * This method is for convenience and a <i>slight</i> speed gain.
+	 * @param key The key
+	 * @param value The JsonObject value
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#put(Object, Object)
+	 */
 	public void put(String key, JsonObject value) throws JsonException
 	{
 		verifyParseState();
 		values.put(key, ValueUtil.createValue(value));
 	}
 	
+	/**
+	 * Puts a JsonArray into this object mapped to the given key.<br>
+	 * This method is for convenience and a <i>slight</i> speed gain.
+	 * @param key The key
+	 * @param value The JsonArray value
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#put(Object, Object)
+	 */
 	public void put(String key, JsonArray value) throws JsonException
 	{
 		verifyParseState();
 		values.put(key, ValueUtil.createValue(value));
 	}
 	
+	/**
+	 * Puts a String into this object mapped to the given key.<br>
+	 * This method is for convenience and a <i>slight</i> speed gain.
+	 * @param key The key
+	 * @param value The String value
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#put(Object, Object)
+	 */
 	public void put(String key, String value) throws JsonException
 	{
 		verifyParseState();
 		values.put(key, ValueUtil.createValue(value));
 	}
 	
+	/**
+	 * Puts a long into this object mapped to the given key.<br>
+	 * This method is for convenience and a <i>slight</i> speed gain.
+	 * @param key The key
+	 * @param value The long value
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#put(Object, Object)
+	 */
 	public void put(String key, long value) throws JsonException
 	{
 		verifyParseState();
 		values.put(key, ValueUtil.createValue(value));
 	}
 	
+	/**
+	 * Puts a int into this object mapped to the given key.<br>
+	 * This method is for convenience and a <i>slight</i> speed gain.
+	 * @param key The key
+	 * @param value The int value
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#put(Object, Object)
+	 */
 	public void put(String key, int value) throws JsonException
 	{
 		verifyParseState();
 		values.put(key, ValueUtil.createValue(value));
 	}
 	
+	/**
+	 * Puts a double into this object mapped to the given key.<br>
+	 * This method is for convenience and a <i>slight</i> speed gain.
+	 * @param key The key
+	 * @param value The double value
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#put(Object, Object)
+	 */
 	public void put(String key, double value) throws JsonException
 	{
 		verifyParseState();
 		values.put(key, ValueUtil.createValue(value));
 	}
 	
+	/**
+	 * Puts a float into this object mapped to the given key.<br>
+	 * This method is for convenience and a <i>slight</i> speed gain.
+	 * @param key The key
+	 * @param value The float value
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#put(Object, Object)
+	 */
 	public void put(String key, float value) throws JsonException
 	{
 		verifyParseState();
 		values.put(key, ValueUtil.createValue(value));
 	}
 	
+	/**
+	 * Puts a boolean into this object mapped to the given key.<br>
+	 * This method is for convenience and a <i>slight</i> speed gain.
+	 * @param key The key
+	 * @param value The boolean value
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#put(Object, Object)
+	 */
 	public void put(String key, boolean value) throws JsonException
 	{
 		verifyParseState();
 		values.put(key, ValueUtil.createValue(value));
 	}
 	
+	/**
+	 * Returns the value associated with the given key.
+	 * @param key The key
+	 * @return The value
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#get(Object)
+	 */
 	public Object get(String key) throws JsonException
 	{
 		verifyParseState();
@@ -274,6 +402,14 @@ public class JsonObject extends JsonElement
 		return value.value;
 	}
 	
+	/**
+	 * Returns the JsonObject value associated with the given key.<br>
+	 * This method is for convenience.
+	 * @param key The key
+	 * @return The JsonObject value
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#get(Object)
+	 */
 	public JsonObject getObject(String key) throws JsonException
 	{
 		verifyParseState();
@@ -286,6 +422,14 @@ public class JsonObject extends JsonElement
 		return (JsonObject)value.value;
 	}
 	
+	/**
+	 * Returns the JsonArray value associated with the given key.<br>
+	 * This method is for convenience.
+	 * @param key The key
+	 * @return The JsonArray value
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#get(Object)
+	 */
 	public JsonArray getArray(String key) throws JsonException
 	{
 		verifyParseState();
@@ -298,6 +442,14 @@ public class JsonObject extends JsonElement
 		return (JsonArray)value.value;
 	}
 	
+	/**
+	 * Returns the String value associated with the given key.<br>
+	 * This method is for convenience.
+	 * @param key The key
+	 * @return The String value
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#get(Object)
+	 */
 	public String getString(String key) throws JsonException
 	{
 		verifyParseState();
@@ -310,6 +462,14 @@ public class JsonObject extends JsonElement
 		return (String)value.value;
 	}
 	
+	/**
+	 * Returns the long value associated with the given key.<br>
+	 * This method is for convenience.
+	 * @param key The key
+	 * @return The long value
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#get(Object)
+	 */
 	public Long getLong(String key) throws JsonException
 	{
 		verifyParseState();
@@ -322,6 +482,14 @@ public class JsonObject extends JsonElement
 		return (Long)value.value;
 	}
 	
+	/**
+	 * Returns the double value associated with the given key.<br>
+	 * This method is for convenience.
+	 * @param key The key
+	 * @return The double value
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#get(Object)
+	 */
 	public Double getDouble(String key) throws JsonException
 	{
 		verifyParseState();
@@ -334,6 +502,14 @@ public class JsonObject extends JsonElement
 		return (Double)value.value;
 	}
 	
+	/**
+	 * Returns the boolean value associated with the given key.<br>
+	 * This method is for convenience.
+	 * @param key The key
+	 * @return The boolean value
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#get(Object)
+	 */
 	public Boolean getBoolean(String key) throws JsonException
 	{
 		verifyParseState();
@@ -346,6 +522,13 @@ public class JsonObject extends JsonElement
 		return (Boolean)value.value;
 	}
 	
+	/**
+	 * Removes the value associated with the specified key.
+	 * @param key The key
+	 * @return The removed value, or <code>null</code> if nothing was removed
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#remove(Object)
+	 */
 	public Object remove(String key) throws JsonException
 	{
 		verifyParseState();
@@ -356,12 +539,23 @@ public class JsonObject extends JsonElement
 	 * Object to JSON methods *
 	 **************************/
 	
+	/**
+	 * Returns this object and its unordered contents in JSON format.
+	 * @return The JSON formatted object
+	 * @see JsonElement#getJSON()
+	 */
 	@Override
 	public String getJSON()
 	{
 		return getJSON(null);
 	}
 	
+	/**
+	 * Returns this object and its contents ordered using the given comparator in JSON format.
+	 * @param comparator The comparator with which to sort the keys
+	 * @return The JSON formatted object
+	 * @see JsonElement#getJSON()
+	 */
 	public String getJSON(Comparator<String> comparator)
 	{
 		StringBuilder json = new StringBuilder();
