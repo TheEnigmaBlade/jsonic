@@ -91,7 +91,7 @@ public class JsonObject extends JsonElement
 			throw new JsonParseException(JsonParseException.Type.INVALID_FORMAT, 0);
 		
 		int index = startIndex+1;
-		boolean seenObj = false;
+		boolean seenElement = false;
 		do
 		{
 			//Move to the start of the next key
@@ -101,19 +101,19 @@ public class JsonObject extends JsonElement
 			char startChar = json.charAt(index);
 			
 			//Make sure it's an allowable character
-			///Separation point (',')
+			//--Separation point (',')
 			if(startChar == ParserUtil.SPLIT)
 			{
 				index = ParserUtil.nextNonWhitespace(json, index+1);
 				startChar = json.charAt(index);
 			}
-			///Or end of the object ('}')
+			//--Or end of the object ('}')
 			else if(startChar == ParserUtil.OBJECT_CLOSE)
 			{
 				break;
 			}
-			///Or someone is bad at formatting their JSON!
-			else if(seenObj)
+			//--Or someone is bad at formatting their JSON!
+			else if(seenElement)
 			{
 				throw new JsonParseException(JsonParseException.Type.INVALID_CHAR, index, startChar);
 			}
@@ -121,13 +121,13 @@ public class JsonObject extends JsonElement
 			
 			//Get the key
 			String key;
-			///String type
+			//--String type
 			if(ParserUtil.isStringChar(startChar))
 			{
 				key = ParserUtil.getStringBlock(json, index);
 				index += key.length()+2;
 			}
-			///Unknown type
+			//--Unknown type
 			else
 			{
 				key = ParserUtil.getUnknownBlock(json, index);
@@ -171,6 +171,8 @@ public class JsonObject extends JsonElement
 					value = ValueUtil.createValue(array);
 					index += array.getRawLength();
 					break;
+				case ParserUtil.ARRAY_CLOSE:
+					throw new JsonParseException(JsonParseException.Type.INVALID_FORMAT, index);
 				
 				//Unknown: boolean, number, or null
 				default: 
@@ -181,7 +183,7 @@ public class JsonObject extends JsonElement
 			
 			//Add the value
 			values.put(key, value);
-			seenObj = true;
+			seenElement = true;
 			
 		}while(index < json.length()-1);
 		
@@ -204,8 +206,8 @@ public class JsonObject extends JsonElement
 	{
 		char c;
 		
-		int n = 1;
-		for(int objCount = 0; startIndex < json.length(); startIndex++, n++)
+		int n = 1, objCount = 0;
+		for(; startIndex < json.length(); startIndex++, n++)
 		{
 			c = json.charAt(startIndex);
 			
@@ -217,6 +219,12 @@ public class JsonObject extends JsonElement
 			if(objCount <= 0)
 				break;
 		}
+		
+		//Not all elements were closed (UH OH!)
+		if(objCount > 0)
+			return 1;
+		
+		//Otherwise return the length
 		return n;
 	}
 	
@@ -545,7 +553,7 @@ public class JsonObject extends JsonElement
 	 * @see JsonElement#getJSON()
 	 */
 	@Override
-	public String getJSON()
+	protected String toJSON()
 	{
 		return getJSON(null);
 	}
@@ -558,6 +566,9 @@ public class JsonObject extends JsonElement
 	 */
 	public String getJSON(Comparator<String> comparator)
 	{
+		if(isParsingDelayed())
+			return getDelayedString();
+		
 		StringBuilder json = new StringBuilder();
 		json.append('{');
 		if(comparator == null)

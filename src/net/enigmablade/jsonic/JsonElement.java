@@ -126,9 +126,7 @@ public abstract class JsonElement
 	protected void verifyParseState() throws JsonParseException
 	{
 		if(isParsingDelayed())
-		{
 			parseDelayed();
-		}
 	}
 	
 	/**
@@ -141,26 +139,44 @@ public abstract class JsonElement
 		return delayedString != null;
 	}
 	
+	protected String getDelayedString()
+	{
+		return delayedString.substring(delayedIndex, delayedIndex+getRawLength(delayedString, delayedIndex));
+	}
+	
 	/**************************
 	 * Object to JSON methods *
 	 **************************/
 	
 	/**
-	 * Returns this element and its contents in JSON format.
+	 * Returns this element and its contents in JSON format.<br>
+	 * Equivalent to @link #getJSON().
 	 * @return The JSON formatted element
 	 */
 	@Override
 	public String toString()
 	{
-		if(isParsingDelayed())
-			return delayedString;
-		else
-			return getJSON();
+		return getJSON();
 	}
 	
 	/**
-	 * Returns this element and its contents in JSON format.
+	 * Returns this element and its contents in JSON format.<br>
+	 * Equivalent to @link #toString().
 	 * @return The JSON formatted element
 	 */
-	public abstract String getJSON();
+	public String getJSON()
+	{
+		if(isParsingDelayed())
+			return getDelayedString();
+		else
+			return toJSON();
+	}
+	
+	/**
+	 * Returns this element and its contents in JSON format.<br>
+	 * To be overridden by subclasses for use in @link #getJSON() and @link #toString().
+	 * Implementations should ignore the delayed state of the element.
+	 * @return The JSON formatted element
+	 */
+	protected abstract String toJSON();
 }
