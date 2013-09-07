@@ -5,7 +5,7 @@ import java.nio.charset.*;
 
 /**
  * <p>The entry point for JSON parsing.<p>
- * <p>Two methods are provided for using the parser: static parsing methods and non-static processing methods.
+ * <p>Two approaches are provided for use of the parser: static parsing methods and non-static processing methods.
  * Both are functionally equivalent and the use of either one is dependent on the user's coding style.<p>
  * 
  * @author Enigma
