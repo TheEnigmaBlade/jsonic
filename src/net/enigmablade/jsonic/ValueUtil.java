@@ -73,27 +73,27 @@ public class ValueUtil
 	
 	protected static Value createValue(long value)
 	{
-		return new Value(ValueType.LONG, value);
+		return new Value(ValueType.LONG, new Long(value));
 	}
 	
 	protected static Value createValue(int value)
 	{
-		return new Value(ValueType.LONG, value);
+		return new Value(ValueType.LONG, new Long(value));
 	}
 	
 	protected static Value createValue(double value)
 	{
-		return new Value(ValueType.DOUBLE, value);
+		return new Value(ValueType.DOUBLE, new Double(value));
 	}
 	
 	protected static Value createValue(float value)
 	{
-		return new Value(ValueType.DOUBLE, value);
+		return new Value(ValueType.DOUBLE, new Double(value));
 	}
 	
 	protected static Value createValue(boolean value)
 	{
-		return new Value(ValueType.BOOLEAN, value);
+		return new Value(ValueType.BOOLEAN, new Boolean(value));
 	}
 	
 	/*

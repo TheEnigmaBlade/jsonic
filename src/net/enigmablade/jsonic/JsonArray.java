@@ -14,6 +14,8 @@ import net.enigmablade.jsonic.ValueUtil.*;
  */
 public class JsonArray extends JsonElement
 {
+	private static final int INITIAL_CAPACITY = 10;
+	
 	//Array data
 	private List<Value> values;
 	
@@ -22,23 +24,33 @@ public class JsonArray extends JsonElement
 	 *********************************/
 	
 	/**
-	 * Creates a new empty JsonArray.
+	 * Creates a new empty JsonArray with an initial size of 10.
 	 */
 	public JsonArray()
 	{
+		this(INITIAL_CAPACITY);
+	}
+	
+	/**
+	 * Creates a new empty JsonArray with the given initial size.
+	 * @param initialCapacity The initial size of the array
+	 * @see java.util.ArrayList#ArrayList(int)
+	 */
+	public JsonArray(int initialCapacity)
+	{
 		super();
-		setup();
-		values = new LinkedList<>();
+		setup(initialCapacity);
 	}
 	
 	/**
 	 * Creates a new JsonArray with the same stored information as the given object.
 	 * @param a The array to clone
+	 * @throw JsonException if an exception occurred during parsing
 	 */
-	public JsonArray(JsonArray a)
+	public JsonArray(JsonArray a) throws JsonException
 	{
 		super(a);
-		setup();
+		setup(a.size());
 		
 		values.addAll(a.values);
 	}
@@ -66,9 +78,9 @@ public class JsonArray extends JsonElement
 	/**
 	 * Sets up required data structures.
 	 */
-	private void setup()
+	private void setup(int initialCapacity)
 	{
-		values = new ArrayList<>();
+		values = new ArrayList<>(initialCapacity);
 	}
 	
 	/**
@@ -82,36 +94,38 @@ public class JsonArray extends JsonElement
 	protected int parse(String json, int startIndex, boolean delayed) throws JsonParseException
 	{
 		//Verify all required data structures exist
-		setup();
+		setup(INITIAL_CAPACITY);
 		
 		//Verify what is being parsed is indeed an array
 		if(json.charAt(startIndex) != ParserUtil.ARRAY_OPEN)
 			throw new JsonParseException(JsonParseException.Type.INVALID_FORMAT, 0);
 		
 		int index = startIndex+1;
-		boolean seenObj = false;
+		boolean seenElement = false;
 		do
 		{
 			//Move to the start of the next value
 			index = ParserUtil.nextNonWhitespace(json, index);
+			System.out.println("Index@start: "+index);
 			
 			//Get information on the value type
 			char startChar = json.charAt(index);
 			
 			//Make sure it's an allowable character
-			///Separation point (',')
+			///Separation point (','), skip to start of next element
 			if(startChar == ParserUtil.SPLIT)
 			{
 				index = ParserUtil.nextNonWhitespace(json, index+1);
 				startChar = json.charAt(index);
 			}
-			///End of array (']')
+			///End of array (']'), stop parsing
 			else if(startChar == ParserUtil.ARRAY_CLOSE)
 			{
+				System.out.println("Array closed");
 				break;
 			}
 			///Or someone is bad at formatting their JSON!
-			else if(seenObj)
+			else if(seenElement)
 			{
 				throw new JsonParseException(JsonParseException.Type.INVALID_CHAR, index, startChar);
 			}
@@ -130,10 +144,15 @@ public class JsonArray extends JsonElement
 				
 				//Object
 				case ParserUtil.OBJECT_OPEN: 
+					System.out.println("Before obj: "+index);
 					JsonObject object = new JsonObject(json, index, delayed);
 					value = ValueUtil.createValue(object);
-					index += object.getRawLength();
+					System.out.println(index += object.getRawLength());
+					System.out.println("After obj: "+index);
 					break;
+				case ParserUtil.OBJECT_CLOSE:
+				case ParserUtil.OBJECT_MAP:
+					throw new JsonParseException(JsonParseException.Type.INVALID_FORMAT, index);
 				
 				//Array
 				case ParserUtil.ARRAY_OPEN: 
@@ -151,10 +170,11 @@ public class JsonArray extends JsonElement
 			
 			//Add the value
 			values.add(value);
-			seenObj = true;
+			seenElement = true;
 			
 		}while(index < json.length()-1);
 		
+		System.out.println(json+" (len="+json.length()+") @ "+index);
 		//Check the very last character to make sure the object was closed
 		if(json.charAt(index) != ParserUtil.ARRAY_CLOSE)
 			throw new JsonParseException(JsonParseException.Type.BAD_END, index);
@@ -455,6 +475,14 @@ public class JsonArray extends JsonElement
 		return values.remove(index);
 	}
 	
+	/**
+	 * Removes all elements from the array.
+	 */
+	public void clear()
+	{
+		values.clear();
+	}
+	
 	/**************************
 	 * Object to JSON methods *
 	 **************************/
@@ -462,10 +490,9 @@ public class JsonArray extends JsonElement
 	/**
 	 * Returns this array and its contents in JSON format.
 	 * @return The JSON formatted array
-	 * @see JsonElement#getJSON()
 	 */
 	@Override
-	public String getJSON()
+	protected String toJSON()
 	{
 		StringBuilder json = new StringBuilder();
 		json.append('[');

@@ -7,6 +7,10 @@ import net.enigmablade.jsonic.*;
 
 public class ArrayTest
 {
+	/*****************
+	 * Parsing tests *
+	 *****************/
+	
 	@Test
 	public void testParse()
 	{
@@ -132,6 +136,201 @@ public class ArrayTest
 		public TestArray(String objStr, boolean delayed) throws JsonParseException
 		{
 			super(objStr, 0, delayed);
+		}
+	}
+	
+	/******************
+	 * Creation tests *
+	 ******************/
+	
+	@Test
+	public void testCreate()
+	{
+		try
+		{
+			//Constructors
+			JsonArray array = new JsonArray();
+			assertEquals(0, array.size());
+			
+			JsonArray array2 = new JsonArray(57);
+			assertEquals(0, array2.size());
+			
+			//add(Object) + get(int)
+			Object addObj = new Object();
+			array.add(addObj);
+			assertEquals(1, array.size());
+			assertEquals(addObj, array.get(0));
+			
+			Object addObj2 = new Object();
+			array.add(addObj2);
+			assertEquals(2, array.size());
+			assertEquals(addObj2, array.get(1));
+			
+			//add(JsonObject) + getObject(int)
+			JsonObject addJObj = new JsonObject();
+			array.add(addJObj);
+			assertEquals(3, array.size());
+			assertEquals(addJObj, array.getObject(2));
+			
+			//add(JsonArray) + getArray(int)
+			JsonArray addJArray = new JsonArray();
+			array.add(addJArray);
+			assertEquals(4, array.size());
+			assertEquals(addJArray, array.getArray(3));
+			
+			//add(String) + getString(int)
+			String addStr = "Kawaii desu!";
+			array.add(addStr);
+			assertEquals(5, array.size());
+			assertEquals(addStr, array.getString(4));
+			
+			//add(int) + getLong(int)
+			int addInt = 1_2_4_8;
+			array.add(addInt);
+			assertEquals(6, array.size());
+			assertEquals(addInt, array.getLong(5).longValue());
+			
+			//add(long) + getLong(int)
+			long addLong = 1_2_4_8_16_32_64;
+			array.add(addLong);
+			assertEquals(7, array.size());
+			assertEquals(addLong, array.getLong(6).longValue());
+			
+			//add(float) + getDouble(int)
+			float addFloat = 1_2_4_8.0f;
+			array.add(addFloat);
+			assertEquals(8, array.size());
+			assertEquals(addFloat, array.getDouble(7).doubleValue(), 0.01);
+			
+			//add(double) + getDouble(int)
+			double addDouble = 1_2_4_8.16_32_64;
+			array.add(addDouble);
+			assertEquals(9, array.size());
+			assertEquals(addDouble, array.getDouble(8).doubleValue(), 0.0000001);
+			
+			//add(boolean) + getBoolean(int)
+			boolean addBoolean = true;
+			array.add(addBoolean);
+			assertEquals(10, array.size());
+			assertTrue(array.getBoolean(9));
+			
+			//Clone constructor
+			JsonArray array3 = new JsonArray(array);
+			assertEquals(10, array3.size());
+			assertEquals(addObj, array3.get(0));
+			assertEquals(addObj2, array3.get(1));
+			assertEquals(addJObj, array3.getObject(2));
+			assertEquals(addJArray, array3.getArray(3));
+			assertEquals(addStr, array3.getString(4));
+			assertEquals(addInt, array3.getLong(5).longValue());
+			assertEquals(addLong, array3.getLong(6).longValue());
+			assertEquals(addFloat, array3.getDouble(7).doubleValue(), 0.01);
+			assertEquals(addDouble, array3.getDouble(8).doubleValue(), 0.0000001);
+			assertTrue(array3.getBoolean(9));
+		}
+		catch(JsonException e)
+		{
+			fail("This shouldn't happen!");
+		}
+	}
+	
+	@Test
+	public void testCreateFailures()
+	{
+		//Delayed invalid JSON
+		JsonArray array = null;
+		try
+		{
+			array = JsonParser.parseArray("[{]", true);
+		}
+		catch(JsonParseException e)
+		{
+			fail("This shouldn't happen!");
+		}
+		
+		//get(int)
+		try
+		{
+			Object o = array.get(0);
+			fail("Didn't throw an exception on delayed invalid JSON");
+		}
+		catch(JsonParseException e){}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			fail("Wrong exception!");
+		}
+		
+		//getObject(int)
+		try
+		{
+			array.getObject(0);
+			fail("Didn't throw an exception on delayed invalid JSON");
+		}
+		catch(JsonParseException e){}
+		catch(Exception e)
+		{
+			fail("Wrong exception!");
+		}
+		
+		//getArray(int)
+		try
+		{
+			array.getArray(0);
+			fail("Didn't throw an exception on delayed invalid JSON");
+		}
+		catch(JsonParseException e){}
+		catch(Exception e)
+		{
+			fail("Wrong exception!");
+		}
+		
+		//getString(int)
+		try
+		{
+			array.getString(0);
+			fail("Didn't throw an exception on delayed invalid JSON");
+		}
+		catch(JsonParseException e){}
+		catch(Exception e)
+		{
+			fail("Wrong exception!");
+		}
+		
+		//getLong(int)
+		try
+		{
+			array.getLong(0);
+			fail("Didn't throw an exception on delayed invalid JSON");
+		}
+		catch(JsonParseException e){}
+		catch(Exception e)
+		{
+			fail("Wrong exception!");
+		}
+		
+		//getDouble(int)
+		try
+		{
+			array.getDouble(0);
+			fail("Didn't throw an exception on delayed invalid JSON");
+		}
+		catch(JsonParseException e){}
+		catch(Exception e)
+		{
+			fail("Wrong exception!");
+		}
+		
+		//getBoolean(int)
+		try
+		{
+			array.getBoolean(0);
+			fail("Didn't throw an exception on delayed invalid JSON");
+		}
+		catch(JsonParseException e){}
+		catch(Exception e)
+		{
+			fail("Wrong exception!");
 		}
 	}
 }
