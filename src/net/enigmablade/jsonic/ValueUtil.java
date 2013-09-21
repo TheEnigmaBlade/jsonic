@@ -23,9 +23,17 @@ public class ValueUtil
 		@Override
 		public String toString()
 		{
-			if(type == ValueType.STRING)
-				return new StringBuilder().append('"').append(value).append('"').toString();
-			return value.toString();
+			switch(type)
+			{
+				case NULL: 
+					return "null";
+					
+				case STRING: 
+					return new StringBuilder().append('"').append(value).append('"').toString();
+					
+				default: 
+					return value.toString();
+			}
 		}
 	}
 	

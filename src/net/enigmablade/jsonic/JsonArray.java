@@ -45,7 +45,7 @@ public class JsonArray extends JsonElement
 	/**
 	 * Creates a new JsonArray with the same stored information as the given object.
 	 * @param a The array to clone
-	 * @throw JsonException if an exception occurred during parsing
+	 * @throws JsonException if an exception occurred during parsing
 	 */
 	public JsonArray(JsonArray a) throws JsonException
 	{
@@ -112,19 +112,19 @@ public class JsonArray extends JsonElement
 			char startChar = json.charAt(index);
 			
 			//Make sure it's an allowable character
-			///Separation point (','), skip to start of next element
+			////Separation point (','), skip to start of next element
 			if(startChar == ParserUtil.SPLIT)
 			{
 				index = ParserUtil.nextNonWhitespace(json, index+1);
 				startChar = json.charAt(index);
 			}
-			///End of array (']'), stop parsing
+			////End of array (']'), stop parsing
 			else if(startChar == ParserUtil.ARRAY_CLOSE)
 			{
 				System.out.println("Array closed");
 				break;
 			}
-			///Or someone is bad at formatting their JSON!
+			////Or someone is bad at formatting their JSON!
 			else if(seenElement)
 			{
 				throw new JsonParseException(JsonParseException.Type.INVALID_CHAR, index, startChar);

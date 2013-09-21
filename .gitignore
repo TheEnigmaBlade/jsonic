@@ -1,4 +1,8 @@
 /.settings
 /bin
+/doc
 /export
 /info.txt
+/releases
+/export*.xml
+/build.num
