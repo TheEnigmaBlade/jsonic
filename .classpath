@@ -6,5 +6,6 @@
 	<classpathentry kind="lib" path="test_libs/json-simple.jar"/>
 	<classpathentry kind="lib" path="test_libs/lolrtmps.jar"/>
 	<classpathentry kind="lib" path="test_libs/quick-json.jar"/>
+	<classpathentry kind="lib" path="test_libs/json-smart.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

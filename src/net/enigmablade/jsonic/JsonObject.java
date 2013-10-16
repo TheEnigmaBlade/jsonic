@@ -1,7 +1,6 @@
 package net.enigmablade.jsonic;
 
 import java.util.*;
-
 import net.enigmablade.jsonic.ValueUtil.*;
 
 /**
@@ -14,6 +13,8 @@ import net.enigmablade.jsonic.ValueUtil.*;
  */
 public class JsonObject extends JsonElement
 {
+	private static final long serialVersionUID = -212184197241566516L;
+	
 	//Object data
 	private Map<String, Value> values;
 	
@@ -149,6 +150,7 @@ public class JsonObject extends JsonElement
 			
 			//Parse the value based on type
 			Value value = null;
+			int len;
 			switch(startChar)
 			{
 				//String
@@ -163,14 +165,18 @@ public class JsonObject extends JsonElement
 				case ParserUtil.OBJECT_OPEN: 
 					JsonObject object = new JsonObject(json, index, delayed);
 					value = ValueUtil.createValue(object);
-					index += object.getRawLength();
+					if((len = object.getRawLength()) < 2)
+						throw new JsonParseException(JsonParseException.Type.INVALID_FORMAT, index);
+					index += len;
 					break;
 				
 				//Array
 				case ParserUtil.ARRAY_OPEN: 
 					JsonArray array = new JsonArray(json, index, delayed);
 					value = ValueUtil.createValue(array);
-					index += array.getRawLength();
+					if((len = array.getRawLength()) < 2)
+						throw new JsonParseException(JsonParseException.Type.INVALID_FORMAT, index);
+					index += len;
 					break;
 				case ParserUtil.ARRAY_CLOSE:
 					throw new JsonParseException(JsonParseException.Type.INVALID_FORMAT, index);
@@ -571,12 +577,12 @@ public class JsonObject extends JsonElement
 			return getDelayedString();
 		
 		StringBuilder json = new StringBuilder();
-		json.append('{');
+		json.append(ParserUtil.OBJECT_OPEN);
 		if(comparator == null)
 			json.append(getJSONHelper());
 		else
 			json.append(getJSONSortedHelper(comparator));
-		json.append('}');
+		json.append(ParserUtil.OBJECT_CLOSE);
 		return json.toString();
 	}
 	
@@ -606,8 +612,8 @@ public class JsonObject extends JsonElement
 	
 	private void appendValue(StringBuilder json, String key, int index)
 	{
-		json.append('"').append(key).append('"');
-		json.append(':');
+		json.append(ParserUtil.STRING_1).append(key).append(ParserUtil.STRING_1);
+		json.append(ParserUtil.OBJECT_MAP);
 		
 		Value value = values.get(key);
 		if(value == null)
@@ -616,6 +622,6 @@ public class JsonObject extends JsonElement
 			json.append(value.toString());
 		
 		if(index < values.size()-1)
-			json.append(',');
+			json.append(ParserUtil.SPLIT);
 	}
 }

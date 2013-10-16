@@ -7,8 +7,15 @@ package net.enigmablade.jsonic;
  */
 public class JsonParseException extends JsonException
 {
+	private static final long serialVersionUID = -1978073027525900118L;
+	
+	/**
+	 * The types of possible parsing errors.
+	 * @author EnigmaBlade
+	 */
 	protected enum Type { BAD_START, BAD_END, INVALID_FORMAT, INVALID_CHAR, UNKNOWN_VALUE_TYPE };
 	
+	//Message options
 	private Type type;
 	private int location;
 	private Object thing;

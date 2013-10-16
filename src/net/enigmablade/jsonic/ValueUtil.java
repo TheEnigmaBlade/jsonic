@@ -7,19 +7,47 @@ package net.enigmablade.jsonic;
  */
 public class ValueUtil
 {
+	/**
+	 * Supported value types.
+	 * @author EnigmaBlade
+	 */
 	protected enum ValueType { OBJECT, ARRAY, STRING, LONG, DOUBLE, BOOLEAN, NULL };
 	
+	/**
+	 * A basic wrapper for an object that also stores the object's type.<br>
+	 * DOES NOT TYPE-CHECK and assumes value is non-null unless the type is NULL.
+	 * @author EnigmaBlade
+	 */
 	protected static class Value
 	{
+		/**
+		 * The value type.
+		 * @see ValueType
+		 */
 		public ValueType type;
+		/**
+		 * The value.
+		 */
 		public Object value;
 		
+		/**
+		 * Creates a new value wrapper.
+		 * @param type The value type
+		 * @param value The value
+		 */
 		public Value(ValueType type, Object value)
 		{
 			this.type = type;
 			this.value = value;
 		}
 		
+		/**
+		 * Returns a string representation of this value:<br>
+		 * - If type is NULL, returns "<code>null</code>"<br>
+		 * - If type is STRING, returns "<code>"value"</code>"<br>
+		 * - Otherwise, returns the result of <code>value.toString()</code>
+		 * @return The string representation
+		 */
 		@Override
 		public String toString()
 		{
@@ -29,7 +57,7 @@ public class ValueUtil
 					return "null";
 					
 				case STRING: 
-					return new StringBuilder().append('"').append(value).append('"').toString();
+					return new StringBuilder().append(ParserUtil.STRING_1).append(value).append(ParserUtil.STRING_1).toString();
 					
 				default: 
 					return value.toString();
@@ -37,6 +65,11 @@ public class ValueUtil
 		}
 	}
 	
+	/**
+	 * Creates a new Value from the given value with the appropriate ValueType.
+	 * @param value The value converted
+	 * @return The new Value wrapper
+	 */
 	protected static Value createValue(Object value)
 	{
 		ValueType type = ValueType.NULL;
@@ -108,41 +141,89 @@ public class ValueUtil
 	 * Public helper methods
 	 */
 	
+	/**
+	 * Returns whether or not the given object is an instance of JsonObject.
+	 * This method is for convenience.
+	 * @param o The object
+	 * @return <code>true</code> if the object is a JsonObject, otherwise <code>false</code>
+	 */
 	public static boolean isJsonObject(Object o)
 	{
 		return o instanceof JsonObject;
 	}
 	
+	/**
+	 * Returns whether or not the given object is an instance of JsonArray.
+	 * This method is for convenience.
+	 * @param o The object
+	 * @return <code>true</code> if the object is a JsonArray, otherwise <code>false</code>
+	 */
 	public static boolean isJsonArray(Object o)
 	{
 		return o instanceof JsonArray;
 	}
 	
+	/**
+	 * Returns whether or not the given object is an instance of String.
+	 * This method is for convenience.
+	 * @param o The object
+	 * @return <code>true</code> if the object is a JsonObject, otherwise <code>false</code>
+	 */
 	public static boolean isString(Object o)
 	{
 		return o instanceof String;
 	}
 	
+	/**
+	 * Returns whether or not the given object is an instance of Long.
+	 * This method is for convenience.
+	 * @param o The object
+	 * @return <code>true</code> if the object is a JsonObject, otherwise <code>false</code>
+	 */
 	public static boolean isLong(Object o)
 	{
 		return o instanceof Long;
 	}
 	
+	/**
+	 * Returns whether or not the given object is an instance of Integer.
+	 * This method is for convenience.
+	 * @param o The object
+	 * @return <code>true</code> if the object is a JsonObject, otherwise <code>false</code>
+	 */
 	public static boolean isInteger(Object o)
 	{
 		return o instanceof Integer;
 	}
 	
+	/**
+	 * Returns whether or not the given object is an instance of Double.
+	 * This method is for convenience.
+	 * @param o The object
+	 * @return <code>true</code> if the object is a JsonObject, otherwise <code>false</code>
+	 */
 	public static boolean isDouble(Object o)
 	{
 		return o instanceof Double;
 	}
 	
+	/**
+	 * Returns whether or not the given object is an instance of Float.
+	 * This method is for convenience.
+	 * @param o The object
+	 * @return <code>true</code> if the object is a JsonObject, otherwise <code>false</code>
+	 */
 	public static boolean isFloat(Object o)
 	{
 		return o instanceof Float;
 	}
 	
+	/**
+	 * Returns whether or not the given object is an instance of Boolean.
+	 * This method is for convenience.
+	 * @param o The object
+	 * @return <code>true</code> if the object is a JsonObject, otherwise <code>false</code>
+	 */
 	public static boolean isBoolean(Object o)
 	{
 		return o instanceof Boolean;

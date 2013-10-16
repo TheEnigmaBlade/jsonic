@@ -1,12 +1,16 @@
 package net.enigmablade.jsonic;
 
+import java.io.*;
+
 /**
  * A basic parsable JSON element for which the parsing can be delayed.
  * 
  * @author Enigma
  */
-public abstract class JsonElement
+public abstract class JsonElement implements Serializable
 {
+	private static final long serialVersionUID = 8291596876632597802L;
+	
 	//Parsing info
 	private String delayedString = null;
 	private int delayedIndex = -1;

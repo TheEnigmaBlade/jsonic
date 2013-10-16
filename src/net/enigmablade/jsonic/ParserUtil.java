@@ -1,7 +1,5 @@
 package net.enigmablade.jsonic;
 
-import java.util.regex.*;
-
 import net.enigmablade.jsonic.ValueUtil.*;
 
 /**
@@ -18,15 +16,18 @@ public class ParserUtil
 	protected static final char ARRAY_OPEN = '[';
 	protected static final char ARRAY_CLOSE = ']';
 	
-	protected static final char STRING_1 = '"', STRING_2 = '\'';;
+	protected static final char OBJECT_MAP = ':';
+	protected static final char SPLIT = ',';
 	
+	protected static final char STRING_1 = '"', STRING_2 = '\'';;
 	protected static boolean isStringChar(char c)
 	{
 		return c == STRING_1 || c == STRING_2;
 	}
 	
-	protected static final char OBJECT_MAP = ':';
-	protected static final char SPLIT = ',';
+	protected static final char FLOATING_POINT_SEPARATOR = '.';
+	protected static final char NUMBER_SPACER_1 = ',', NUMBER_SPACER_2 = '_';
+	
 	
 	//String navigation
 	
@@ -117,56 +118,60 @@ public class ParserUtil
 		return block.toString();
 	}
 	
-	//Number parsing
-	
-	private static final Pattern longPattern = Pattern.compile("-?\\d+");
-	private static final Pattern doublePattern = Pattern.compile("-?\\d*(\\.\\d+)?");
-	
-	protected static boolean isLong(String str)
-	{
-		return longPattern.matcher(str).matches();
-	}
-	
-	protected static boolean isDouble(String str)
-	{
-		return doublePattern.matcher(str).matches();
-	}
-	
 	protected static Value parseUnknown(String str) throws JsonParseException
 	{
-		switch(str.charAt(0))
+		NaN: switch(str.charAt(0))
 		{
 			//True
 			case 't':
-				if("true".equals(str))
+				if(str.length() == 4 && str.charAt(1) == 'r' && str.charAt(2) == 'u' && str.charAt(3) == 'e')
 					return ValueUtil.createValue(true);
 				break;
 			
 			//False
 			case 'f':
-				if("false".equals(str))
+				if(str.length() == 5 && str.charAt(1) == 'a' && str.charAt(2) == 'l' && str.charAt(3) == 's' && str.charAt(4) == 'e')
 					return ValueUtil.createValue(false);
 				break;
 			
 			//Null
 			case 'n':
-				if("null".equals(str))
+				if(str.length() == 4 && str.charAt(1) == 'u' && str.charAt(2) == 'l' && str.charAt(3) == 'l')
 					return ValueUtil.createNullValue();
 				break;
 			
 			//A number
-			//TODO - Possible future optimizations: check if a number and long/double at the same time
 			default:
-				if(isLong(str))
+				boolean hasDecimal = false;
+				for(char c : str.toCharArray())
 				{
-					long value = Long.parseLong(str);
-					return ValueUtil.createValue(value);
+					switch(c)
+					{
+						//Decimal
+						case FLOATING_POINT_SEPARATOR:
+							//Can't have two decimal points, NaN
+							if(hasDecimal)
+								break NaN;
+							hasDecimal = true;
+							break;
+						
+						//Spacers, ignore
+						case NUMBER_SPACER_1:
+						case NUMBER_SPACER_2:
+							break;
+						
+						//Check if valid digit
+						default:
+							if(c < '0' && c > '9')
+								break NaN;
+					}
 				}
-				if(isDouble(str))
-				{
-					double value = Double.parseDouble(str);
-					return ValueUtil.createValue(value);
-				}
+				
+				//Return a double if a decimal was found
+				if(hasDecimal)
+					return ValueUtil.createValue(Double.parseDouble(str));
+				//Otherwise return a long
+				return ValueUtil.createValue(Long.parseLong(str));
 		}
 		
 		throw new JsonParseException(JsonParseException.Type.UNKNOWN_VALUE_TYPE, str);
