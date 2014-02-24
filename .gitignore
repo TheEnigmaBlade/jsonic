@@ -6,5 +6,5 @@
 /releases
 /export*.xml
 /build.num
-/test_libs
 /export.properties
+/test_libs/heug.json
