@@ -6,3 +6,5 @@
 /releases
 /export*.xml
 /build.num
+/test_libs
+/export.properties

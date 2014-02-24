@@ -117,6 +117,7 @@ public class JsonObject extends JsonElement
 			//--Or someone is bad at formatting their JSON!
 			else if(seenElement)
 			{
+				//System.out.println("ERROR ON: "+json.substring(startIndex, startIndex+getRawLength()));
 				throw new JsonParseException(JsonParseException.Type.INVALID_CHAR, index, startChar);
 			}
 			
@@ -244,7 +245,7 @@ public class JsonObject extends JsonElement
 	 * @return The size of the object
 	 * @throws JsonException if an exception occurred during parsing
 	 */
-	public int size() throws JsonException
+	public int size()
 	{
 		verifyParseState();
 		
@@ -256,7 +257,7 @@ public class JsonObject extends JsonElement
 	 * @return <code>true</code> if it contains keys or values, otherwise <code>false</code>
 	 * @throws JsonException if an exception occurred during parsing
 	 */
-	public boolean isEmpty() throws JsonException
+	public boolean isEmpty()
 	{
 		verifyParseState();
 		return values.isEmpty();
@@ -268,11 +269,24 @@ public class JsonObject extends JsonElement
 	 * @throws JsonException if an exception occurred during parsing
 	 * @see java.util.Map#keySet()
 	 */
-	public Set<String> keySet() throws JsonException
+	public Set<String> keySet()
 	{
 		verifyParseState();
 		
 		return values.keySet();
+	}
+	
+	/**
+	 * Returns whether or not this object contains the given key.
+	 * @param key The key
+	 * @return <code>true</code> if this object contains the key, otherwise <code>false</code>
+	 * @throws JsonException  if an exception occurred during parsing
+	 * @see java.util.Map#containsKey(Object)
+	 */
+	public boolean containsKey(String key)
+	{
+		verifyParseState();
+		return values.containsKey(key);
 	}
 	
 	/**
@@ -282,7 +296,7 @@ public class JsonObject extends JsonElement
 	 * @throws JsonException if an exception occurred during parsing
 	 * @see java.util.Map#put(Object, Object)
 	 */
-	public void put(String key, Object value) throws JsonException
+	public void put(String key, Object value)
 	{
 		verifyParseState();
 		values.put(key, ValueUtil.createValue(value));
@@ -296,7 +310,7 @@ public class JsonObject extends JsonElement
 	 * @throws JsonException if an exception occurred during parsing
 	 * @see java.util.Map#put(Object, Object)
 	 */
-	public void put(String key, JsonObject value) throws JsonException
+	public void put(String key, JsonObject value)
 	{
 		verifyParseState();
 		values.put(key, ValueUtil.createValue(value));
@@ -310,7 +324,7 @@ public class JsonObject extends JsonElement
 	 * @throws JsonException if an exception occurred during parsing
 	 * @see java.util.Map#put(Object, Object)
 	 */
-	public void put(String key, JsonArray value) throws JsonException
+	public void put(String key, JsonArray value)
 	{
 		verifyParseState();
 		values.put(key, ValueUtil.createValue(value));
@@ -324,7 +338,7 @@ public class JsonObject extends JsonElement
 	 * @throws JsonException if an exception occurred during parsing
 	 * @see java.util.Map#put(Object, Object)
 	 */
-	public void put(String key, String value) throws JsonException
+	public void put(String key, String value)
 	{
 		verifyParseState();
 		values.put(key, ValueUtil.createValue(value));
@@ -338,7 +352,7 @@ public class JsonObject extends JsonElement
 	 * @throws JsonException if an exception occurred during parsing
 	 * @see java.util.Map#put(Object, Object)
 	 */
-	public void put(String key, long value) throws JsonException
+	public void put(String key, long value)
 	{
 		verifyParseState();
 		values.put(key, ValueUtil.createValue(value));
@@ -352,7 +366,7 @@ public class JsonObject extends JsonElement
 	 * @throws JsonException if an exception occurred during parsing
 	 * @see java.util.Map#put(Object, Object)
 	 */
-	public void put(String key, int value) throws JsonException
+	public void put(String key, int value)
 	{
 		verifyParseState();
 		values.put(key, ValueUtil.createValue(value));
@@ -366,7 +380,7 @@ public class JsonObject extends JsonElement
 	 * @throws JsonException if an exception occurred during parsing
 	 * @see java.util.Map#put(Object, Object)
 	 */
-	public void put(String key, double value) throws JsonException
+	public void put(String key, double value)
 	{
 		verifyParseState();
 		values.put(key, ValueUtil.createValue(value));
@@ -380,7 +394,7 @@ public class JsonObject extends JsonElement
 	 * @throws JsonException if an exception occurred during parsing
 	 * @see java.util.Map#put(Object, Object)
 	 */
-	public void put(String key, float value) throws JsonException
+	public void put(String key, float value)
 	{
 		verifyParseState();
 		values.put(key, ValueUtil.createValue(value));
@@ -394,7 +408,7 @@ public class JsonObject extends JsonElement
 	 * @throws JsonException if an exception occurred during parsing
 	 * @see java.util.Map#put(Object, Object)
 	 */
-	public void put(String key, boolean value) throws JsonException
+	public void put(String key, boolean value)
 	{
 		verifyParseState();
 		values.put(key, ValueUtil.createValue(value));
@@ -407,7 +421,7 @@ public class JsonObject extends JsonElement
 	 * @throws JsonException if an exception occurred during parsing
 	 * @see java.util.Map#get(Object)
 	 */
-	public Object get(String key) throws JsonException
+	public Object get(String key)
 	{
 		verifyParseState();
 		
@@ -425,7 +439,7 @@ public class JsonObject extends JsonElement
 	 * @throws JsonException if an exception occurred during parsing
 	 * @see java.util.Map#get(Object)
 	 */
-	public JsonObject getObject(String key) throws JsonException
+	public JsonObject getObject(String key)
 	{
 		verifyParseState();
 		
@@ -445,7 +459,7 @@ public class JsonObject extends JsonElement
 	 * @throws JsonException if an exception occurred during parsing
 	 * @see java.util.Map#get(Object)
 	 */
-	public JsonArray getArray(String key) throws JsonException
+	public JsonArray getArray(String key)
 	{
 		verifyParseState();
 		
@@ -465,7 +479,7 @@ public class JsonObject extends JsonElement
 	 * @throws JsonException if an exception occurred during parsing
 	 * @see java.util.Map#get(Object)
 	 */
-	public String getString(String key) throws JsonException
+	public String getString(String key)
 	{
 		verifyParseState();
 		
@@ -485,7 +499,7 @@ public class JsonObject extends JsonElement
 	 * @throws JsonException if an exception occurred during parsing
 	 * @see java.util.Map#get(Object)
 	 */
-	public Long getLong(String key) throws JsonException
+	public Long getLong(String key)
 	{
 		verifyParseState();
 		
@@ -498,6 +512,19 @@ public class JsonObject extends JsonElement
 	}
 	
 	/**
+	 * Returns the integer value associated with the given key.<br>
+	 * This method is for convenience.
+	 * @param key The key
+	 * @return The integer value
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#get(Object)
+	 */
+	public Integer getInt(String key)
+	{
+		return getLong(key).intValue();
+	}
+	
+	/**
 	 * Returns the double value associated with the given key.<br>
 	 * This method is for convenience.
 	 * @param key The key
@@ -505,7 +532,7 @@ public class JsonObject extends JsonElement
 	 * @throws JsonException if an exception occurred during parsing
 	 * @see java.util.Map#get(Object)
 	 */
-	public Double getDouble(String key) throws JsonException
+	public Double getDouble(String key)
 	{
 		verifyParseState();
 		
@@ -518,6 +545,19 @@ public class JsonObject extends JsonElement
 	}
 	
 	/**
+	 * Returns the float value associated with the given key.<br>
+	 * This method is for convenience.
+	 * @param key The key
+	 * @return The float value
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#get(Object)
+	 */
+	public Float getFloat(String key)
+	{
+		return getDouble(key).floatValue();
+	}
+	
+	/**
 	 * Returns the boolean value associated with the given key.<br>
 	 * This method is for convenience.
 	 * @param key The key
@@ -525,7 +565,7 @@ public class JsonObject extends JsonElement
 	 * @throws JsonException if an exception occurred during parsing
 	 * @see java.util.Map#get(Object)
 	 */
-	public Boolean getBoolean(String key) throws JsonException
+	public Boolean getBoolean(String key)
 	{
 		verifyParseState();
 		
@@ -544,7 +584,7 @@ public class JsonObject extends JsonElement
 	 * @throws JsonException if an exception occurred during parsing
 	 * @see java.util.Map#remove(Object)
 	 */
-	public Object remove(String key) throws JsonException
+	public Object remove(String key)
 	{
 		verifyParseState();
 		return values.remove(key);

@@ -1,7 +1,6 @@
 package net.enigmablade.jsonic;
 
 import java.util.*;
-
 import net.enigmablade.jsonic.ValueUtil.*;
 
 /**
@@ -12,7 +11,7 @@ import net.enigmablade.jsonic.ValueUtil.*;
  * 
  * @author Enigma
  */
-public class JsonArray extends JsonElement
+public class JsonArray extends JsonElement implements Iterable<Object>
 {
 	private static final long serialVersionUID = -7960304694583142305L;
 	
@@ -50,7 +49,7 @@ public class JsonArray extends JsonElement
 	 * @param a The array to clone
 	 * @throws JsonException if an exception occurred during parsing
 	 */
-	public JsonArray(JsonArray a) throws JsonException
+	public JsonArray(JsonArray a)
 	{
 		super(a);
 		setup(a.size());
@@ -221,7 +220,7 @@ public class JsonArray extends JsonElement
 	 * @return The size of the array
 	 * @throws JsonException if an exception occurred during parsing
 	 */
-	public int size() throws JsonException
+	public int size()
 	{
 		verifyParseState();
 		return values.size();
@@ -232,7 +231,7 @@ public class JsonArray extends JsonElement
 	 * @param value The object to add
 	 * @throws JsonException if an exception occurred during parsing
 	 */
-	public void add(Object value) throws JsonException
+	public void add(Object value)
 	{
 		verifyParseState();
 		values.add(ValueUtil.createValue(value));
@@ -244,7 +243,7 @@ public class JsonArray extends JsonElement
 	 * @param value The JsonObject to add
 	 * @throws JsonException if an exception occurred during parsing
 	 */
-	public void add(JsonObject value) throws JsonException
+	public void add(JsonObject value)
 	{
 		verifyParseState();
 		values.add(ValueUtil.createValue(value));
@@ -256,7 +255,7 @@ public class JsonArray extends JsonElement
 	 * @param value The JsonArray to add
 	 * @throws JsonException if an exception occurred during parsing
 	 */
-	public void add(JsonArray value) throws JsonException
+	public void add(JsonArray value)
 	{
 		verifyParseState();
 		values.add(ValueUtil.createValue(value));
@@ -268,7 +267,7 @@ public class JsonArray extends JsonElement
 	 * @param value The String to add
 	 * @throws JsonException if an exception occurred during parsing
 	 */
-	public void add(String value) throws JsonException
+	public void add(String value)
 	{
 		verifyParseState();
 		values.add(ValueUtil.createValue(value));
@@ -280,7 +279,7 @@ public class JsonArray extends JsonElement
 	 * @param value The long to add
 	 * @throws JsonException if an exception occurred during parsing
 	 */
-	public void add(long value) throws JsonException
+	public void add(long value)
 	{
 		verifyParseState();
 		values.add(ValueUtil.createValue(value));
@@ -292,7 +291,7 @@ public class JsonArray extends JsonElement
 	 * @param value The int to add
 	 * @throws JsonException if an exception occurred during parsing
 	 */
-	public void add(int value) throws JsonException
+	public void add(int value)
 	{
 		verifyParseState();
 		values.add(ValueUtil.createValue(value));
@@ -304,7 +303,7 @@ public class JsonArray extends JsonElement
 	 * @param value The double to add
 	 * @throws JsonException if an exception occurred during parsing
 	 */
-	public void add(double value) throws JsonException
+	public void add(double value)
 	{
 		verifyParseState();
 		values.add(ValueUtil.createValue(value));
@@ -316,7 +315,7 @@ public class JsonArray extends JsonElement
 	 * @param value The float to add
 	 * @throws JsonException if an exception occurred during parsing
 	 */
-	public void add(float value) throws JsonException
+	public void add(float value)
 	{
 		verifyParseState();
 		values.add(ValueUtil.createValue(value));
@@ -328,7 +327,7 @@ public class JsonArray extends JsonElement
 	 * @param value The boolean to add
 	 * @throws JsonException if an exception occurred during parsing
 	 */
-	public void add(boolean value) throws JsonException
+	public void add(boolean value)
 	{
 		verifyParseState();
 		values.add(ValueUtil.createValue(value));
@@ -340,7 +339,7 @@ public class JsonArray extends JsonElement
 	 * @return The value
 	 * @throws JsonException if an exception occurred during parsing
 	 */
-	public Object get(int index) throws JsonException
+	public Object get(int index)
 	{
 		verifyParseState();
 		
@@ -357,7 +356,7 @@ public class JsonArray extends JsonElement
 	 * @return The JsonObject value
 	 * @throws JsonException if an exception occurred during parsing
 	 */
-	public JsonObject getObject(int index) throws JsonException
+	public JsonObject getObject(int index)
 	{
 		verifyParseState();
 		
@@ -376,7 +375,7 @@ public class JsonArray extends JsonElement
 	 * @return The JsonArray value
 	 * @throws JsonException if an exception occurred during parsing
 	 */
-	public JsonArray getArray(int index) throws JsonException
+	public JsonArray getArray(int index)
 	{
 		verifyParseState();
 		
@@ -395,7 +394,7 @@ public class JsonArray extends JsonElement
 	 * @return The String value
 	 * @throws JsonException if an exception occurred during parsing
 	 */
-	public String getString(int index) throws JsonException
+	public String getString(int index)
 	{
 		verifyParseState();
 		
@@ -414,7 +413,7 @@ public class JsonArray extends JsonElement
 	 * @return The long value
 	 * @throws JsonException if an exception occurred during parsing
 	 */
-	public Long getLong(int index) throws JsonException
+	public Long getLong(int index)
 	{
 		verifyParseState();
 		
@@ -427,13 +426,26 @@ public class JsonArray extends JsonElement
 	}
 	
 	/**
+	 * Returns the integer value associated with the given key.<br>
+	 * This method is for convenience.
+	 * @param index The index in the array
+	 * @return The integer value
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#get(Object)
+	 */
+	public Integer getInt(int index)
+	{
+		return getLong(index).intValue();
+	}
+	
+	/**
 	 * Returns the value at the specified index in the array.<br>
 	 * This method is for convenience.
 	 * @param index The index in the array
 	 * @return The double value
 	 * @throws JsonException if an exception occurred during parsing
 	 */
-	public Double getDouble(int index) throws JsonException
+	public Double getDouble(int index)
 	{
 		verifyParseState();
 		
@@ -446,13 +458,26 @@ public class JsonArray extends JsonElement
 	}
 	
 	/**
+	 * Returns the float value associated with the given key.<br>
+	 * This method is for convenience.
+	 * @param index The index in the array
+	 * @return The float value
+	 * @throws JsonException if an exception occurred during parsing
+	 * @see java.util.Map#get(Object)
+	 */
+	public Float getFloat(int index)
+	{
+		return getDouble(index).floatValue();
+	}
+	
+	/**
 	 * Returns the value at the specified index in the array.<br>
 	 * This method is for convenience.
 	 * @param index The index in the array
 	 * @return The boolean value
 	 * @throws JsonException if an exception occurred during parsing
 	 */
-	public Boolean getBoolean(int index) throws JsonException
+	public Boolean getBoolean(int index)
 	{
 		verifyParseState();
 		
@@ -471,7 +496,7 @@ public class JsonArray extends JsonElement
 	 * @throws JsonException if an exception occurred during parsing 
 	 * @throws IndexOutOfBoundsException if the index is out of range (<tt>index &lt; 0 || index &gt;= size()</tt>)
 	 */
-	public Object remove(int index) throws JsonException
+	public Object remove(int index)
 	{
 		verifyParseState();
 		return values.remove(index);
@@ -483,6 +508,15 @@ public class JsonArray extends JsonElement
 	public void clear()
 	{
 		values.clear();
+	}
+	
+	/**
+	 * Returns an iterator for this array.
+	 * @return An iterator.
+	 */
+	public JsonIterator iterator()
+	{
+		return new JsonIterator(this);
 	}
 	
 	/**************************

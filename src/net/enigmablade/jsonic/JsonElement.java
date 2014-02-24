@@ -157,11 +157,11 @@ public abstract class JsonElement implements Serializable
 	 * Equivalent to @link #getJSON().
 	 * @return The JSON formatted element
 	 */
-	@Override
+	/*@Override
 	public String toString()
 	{
 		return getJSON();
-	}
+	}*/
 	
 	/**
 	 * Returns this element and its contents in JSON format.<br>

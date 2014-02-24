@@ -5,7 +5,7 @@ package net.enigmablade.jsonic;
  * 
  * @author Enigma
  */
-public class JsonException extends Exception
+public class JsonException extends RuntimeException
 {
 	private static final long serialVersionUID = -3723591975062307468L;
 	
