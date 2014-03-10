@@ -1,8 +1,8 @@
 package tests;
 
 import static org.junit.Assert.*;
+import java.lang.reflect.*;
 import org.junit.*;
-
 import net.enigmablade.jsonic.*;
 
 public class ArrayTest
@@ -109,34 +109,6 @@ public class ArrayTest
 			{
 				fail("Failed to get value: "+e.toString());
 			}
-		}
-	}
-	
-	/*
-	 * Helper things
-	 */
-	
-	private String previousError;
-	
-	private JsonArray testParseHelper(String objStr)
-	{
-		try
-		{
-			return new TestArray(objStr, false);
-		}
-		catch(JsonParseException e)
-		{
-			previousError = e.getMessage();
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	private class TestArray extends JsonArray
-	{
-		public TestArray(String objStr, boolean delayed) throws JsonParseException
-		{
-			super(objStr, 0, delayed);
 		}
 	}
 	
@@ -332,6 +304,230 @@ public class ArrayTest
 		catch(Exception e)
 		{
 			fail("Wrong exception!");
+		}
+	}
+	
+	/***************
+	 * Value tests *
+	 ***************/
+	
+	@Test
+	public void testValues()
+	{
+		//Longs
+		String[] objectsJson =		{ "[{}]",				"[{}, {}]",								"[{}, {}, {}]"	};
+		JsonObject[][] objectsEx =	{  {new JsonObject()},	 {new JsonObject(), new JsonObject()},	 {new JsonObject(), new JsonObject(), new JsonObject()}	};
+		for(int objectsJsoff = 0; objectsJsoff < objectsJson.length; objectsJsoff++)
+		{
+			String json = objectsJson[objectsJsoff];
+			JsonObject[] ex = objectsEx[objectsJsoff];
+			
+			JsonArray parsed = new TestArray(json, false);
+			assertEquals(ex.length, parsed.size());
+			for(int e = 0; e < ex.length; e++)
+			{
+				//Valid
+				assertEquals(ex[e], ((JsonObject)parsed.get(e)));
+				assertEquals(ex[e], parsed.getObject(e));
+				
+				//Invalid
+				invalidValueHelper(parsed, "getArray", e);
+				invalidValueHelper(parsed, "getString", e);
+				invalidValueHelper(parsed, "getLong", e);
+				invalidValueHelper(parsed, "getInt", e);
+				invalidValueHelper(parsed, "getDouble", e);
+				invalidValueHelper(parsed, "getFloat", e);
+				invalidValueHelper(parsed, "getBoolean", e);
+			}
+		}
+		
+		//Strings
+		String[] stringsJson =	{ "[\"test1\"]",	"[\"test1\", \"test2\"]",	"[\"test1\", \"test2\", \"test3\"]"	};
+		String[][] stringsEx =	{  {"test1"},		 {"test1", "test2"},		 {"test1", "test2", "test3"}		};
+		for(int stringsJsoff = 0; stringsJsoff < stringsJson.length; stringsJsoff++)
+		{
+			String json = stringsJson[stringsJsoff];
+			String[] ex = stringsEx[stringsJsoff];
+			
+			JsonArray parsed = new TestArray(json, false);
+			assertEquals(ex.length, parsed.size());
+			for(int e = 0; e < ex.length; e++)
+			{
+				//Valid
+				assertEquals(ex[e], (String)parsed.get(e));
+				assertEquals(ex[e], parsed.getString(e));
+				
+				//Invalid
+				invalidValueHelper(parsed, "getObject", e);
+				invalidValueHelper(parsed, "getArray", e);
+				invalidValueHelper(parsed, "getLong", e);
+				invalidValueHelper(parsed, "getInt", e);
+				invalidValueHelper(parsed, "getDouble", e);
+				invalidValueHelper(parsed, "getFloat", e);
+				invalidValueHelper(parsed, "getBoolean", e);
+			}
+		}
+		
+		//Longs
+		String[] longsJson =	{ "[1]",	"[1, 2]",	"[1, 2, 3]"	};
+		long[][] longsEx =		{  {1},		 {1, 2},	 {1, 2, 3}	};
+		for(int intsJsoff = 0; intsJsoff < longsJson.length; intsJsoff++)
+		{
+			String json = longsJson[intsJsoff];
+			long[] ex = longsEx[intsJsoff];
+			
+			JsonArray parsed = new TestArray(json, false);
+			assertEquals(ex.length, parsed.size());
+			for(int e = 0; e < ex.length; e++)
+			{
+				//Valid
+				assertEquals(ex[e], ((Long)parsed.get(e)).longValue());
+				assertEquals(ex[e], parsed.getLong(e).longValue());
+				assertEquals(ex[e], parsed.getInt(e).intValue());
+				
+				//Invalid
+				invalidValueHelper(parsed, "getObject", e);
+				invalidValueHelper(parsed, "getArray", e);
+				invalidValueHelper(parsed, "getString", e);
+				invalidValueHelper(parsed, "getDouble", e);
+				invalidValueHelper(parsed, "getFloat", e);
+				invalidValueHelper(parsed, "getBoolean", e);
+			}
+		}
+		
+		//Floats
+		String[] floatsJson =	{ "[1.1]",	"[1.1, 2.2f]",	"[1.1, 2.2f, 3.3d]"	};
+		float[][] floatsEx =	{  {1.1f},	 {1.1f, 2.2f},	 {1.1f, 2.2f, 3.3f}	};
+		for(int floatsJsoff = 0; floatsJsoff < floatsJson.length; floatsJsoff++)
+		{
+			String json = floatsJson[floatsJsoff];
+			float[] ex = floatsEx[floatsJsoff];
+			
+			JsonArray parsed = new TestArray(json, false);
+			assertEquals(ex.length, parsed.size());
+			for(int e = 0; e < ex.length; e++)
+			{
+				//Valid
+				assertEquals(ex[e], ((Double)parsed.get(e)).doubleValue(), 0.01);
+				assertEquals(ex[e], parsed.getDouble(e).doubleValue(), 0.01);
+				assertEquals(ex[e], parsed.getFloat(e).floatValue(), 0.01f);
+				
+				//Invalid
+				invalidValueHelper(parsed, "getObject", e);
+				invalidValueHelper(parsed, "getArray", e);
+				invalidValueHelper(parsed, "getString", e);
+				invalidValueHelper(parsed, "getLong", e);
+				invalidValueHelper(parsed, "getInt", e);
+				invalidValueHelper(parsed, "getBoolean", e);
+			}
+		}
+		
+		//Booleans
+		String[] boolJson =		{ "[true]",	"[true, false]",	"[true, false, true]"	};
+		boolean[][] boolEx =	{  {true},	 {true, false},		 {true, false, true}	};
+		for(int boolsJsoff = 0; boolsJsoff < boolJson.length; boolsJsoff++)
+		{
+			String json = boolJson[boolsJsoff];
+			boolean[] ex = boolEx[boolsJsoff];
+			
+			JsonArray parsed = new TestArray(json, false);
+			assertEquals(ex.length, parsed.size());
+			for(int e = 0; e < ex.length; e++)
+			{
+				//Valid
+				assertEquals(ex[e], ((Boolean)parsed.get(e)).booleanValue());
+				assertEquals(ex[e], parsed.getBoolean(e).booleanValue());
+				
+				//Invalid
+				invalidValueHelper(parsed, "getObject", e);
+				invalidValueHelper(parsed, "getArray", e);
+				invalidValueHelper(parsed, "getString", e);
+				invalidValueHelper(parsed, "getLong", e);
+				invalidValueHelper(parsed, "getInt", e);
+				invalidValueHelper(parsed, "getDouble", e);
+				invalidValueHelper(parsed, "getFloat", e);
+			}
+		}
+		
+		//Nulls
+		String[] nullJson =	{ "[null]",	"[null, null]",	"[null, null, null]"	};
+		Object[][] nullEx =	{  {null},	 {null, null},	 {null, null, null}		};	//Should I really be expecting anything else?
+		for(int nullJsoff = 0; nullJsoff < nullJson.length; nullJsoff++)
+		{
+			String json = nullJson[nullJsoff];
+			Object[] ex = nullEx[nullJsoff];
+			
+			JsonArray parsed = new TestArray(json, false);
+			assertEquals(ex.length, parsed.size());
+			for(int e = 0; e < ex.length; e++)
+			{
+				//Valid
+				assertNull(parsed.get(e));
+				assertNull(parsed.getObject(e));
+				assertNull(parsed.getArray(e));
+				assertNull(parsed.getString(e));
+				assertNull(parsed.getLong(e));
+				assertNull(parsed.getInt(e));
+				assertNull(parsed.getDouble(e));
+				assertNull(parsed.getFloat(e));
+				assertNull(parsed.getBoolean(e));
+			}
+		}
+	}
+	
+	// Helper things
+	
+	private class TestArray extends JsonArray
+	{
+		public TestArray(String objStr, boolean delayed) throws JsonParseException
+		{
+			super(objStr, 0, delayed);
+		}
+	}
+	
+	////Parsing
+	
+	private String previousError;
+	
+	private JsonArray testParseHelper(String objStr)
+	{
+		try
+		{
+			return new TestArray(objStr, false);
+		}
+		catch(JsonParseException e)
+		{
+			previousError = e.getMessage();
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	////Values
+	
+	private void invalidValueHelper(Object obj, String methodName, int i)
+	{
+		try
+		{
+			Method m = obj.getClass().getMethod(methodName, int.class);
+			m.invoke(obj, i);
+			fail("Didn't cause an invalid value exception.");
+		}
+		catch(NoSuchMethodException | SecurityException e)
+		{
+			System.err.println("Error when getting the method. Uh oh!");
+			e.printStackTrace();
+			fail();
+		}
+		catch(IllegalAccessException | IllegalArgumentException e)
+		{
+			System.err.println("Error when invoking the method. Uh oh!");
+			e.printStackTrace();
+			fail();
+		}
+		catch(InvocationTargetException e)
+		{
+			assertEquals(JsonTypeException.class, e.getTargetException().getClass());
 		}
 	}
 }

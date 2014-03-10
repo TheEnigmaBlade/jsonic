@@ -218,10 +218,4 @@ public class ValueUtilTest extends ValueUtil
 		assertEquals(ValueType.NULL, nullValue.type);
 		assertNull(nullValue.value);
 	}
-	
-	@Test
-	public void testIsTypeHelpers()
-	{
-		
-	}
 }

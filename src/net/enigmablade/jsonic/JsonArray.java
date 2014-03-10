@@ -11,7 +11,7 @@ import net.enigmablade.jsonic.ValueUtil.*;
  * 
  * @author Enigma
  */
-public class JsonArray extends JsonElement implements Iterable<Object>
+public class JsonArray extends JsonElement implements Iterable<Object>, Cloneable
 {
 	private static final long serialVersionUID = -7960304694583142305L;
 	
@@ -19,7 +19,7 @@ public class JsonArray extends JsonElement implements Iterable<Object>
 	private static final int INITIAL_CAPACITY = 10;
 	
 	//Array data
-	private List<Value> values;
+	private ArrayList<Value> values;
 	
 	/*********************************
 	 * Constructors for JSON Creation*
@@ -435,7 +435,10 @@ public class JsonArray extends JsonElement implements Iterable<Object>
 	 */
 	public Integer getInt(int index)
 	{
-		return getLong(index).intValue();
+		Long l = getLong(index);
+		if(l == null)
+			return null;
+		return l.intValue();
 	}
 	
 	/**
@@ -467,7 +470,10 @@ public class JsonArray extends JsonElement implements Iterable<Object>
 	 */
 	public Float getFloat(int index)
 	{
-		return getDouble(index).floatValue();
+		Double d = getDouble(index);
+		if(d == null)
+			return null;
+		return d.floatValue();
 	}
 	
 	/**
@@ -546,5 +552,57 @@ public class JsonArray extends JsonElement implements Iterable<Object>
 		json.append(ParserUtil.ARRAY_CLOSE);
 		return json.toString();
 	}
-
+	
+	/********************
+	 * Object overrides *
+	 ********************/
+	
+	/**
+	 * Checks whether this array and and its contents are equal.
+	 * If parsing is delayed, uses the same method as in JsonElement.
+	 * 
+	 * @param o The array to check against.
+	 * @return <code>true</code> if the two arrays are equal, otherwise <code>false</code>.
+	 * 
+	 * @see JsonElement#equals(Object)
+	 */
+	@Override
+	public boolean equals(Object o)
+	{
+		if(o == null || !(o instanceof JsonArray))
+			return false;
+		
+		JsonArray a = (JsonArray)o;
+		return values.equals(a.values);
+	}
+	
+	/**
+	 * Returns the hash code of this JSON array using the method defined in List.
+	 * 
+	 * @returns This object's hash code.
+	 * 
+	 * @see List#hashCode()
+	 */
+	@Override
+	public int hashCode()
+	{
+		return values.hashCode();
+	}
+	
+	/**
+	 * Clones this array based on ArrayList's clone method.
+	 * If parsed, the array will be "shallow copied".
+	 * 
+	 * @return The cloned array.
+	 * 
+	 * @see ArrayList#clone()
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	public Object clone() throws CloneNotSupportedException
+	{
+		JsonArray newArray = (JsonArray)super.clone();
+		newArray.values = (ArrayList<Value>)values.clone();
+		return newArray;
+	}
 }

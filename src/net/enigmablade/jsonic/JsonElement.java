@@ -7,7 +7,7 @@ import java.io.*;
  * 
  * @author Enigma
  */
-public abstract class JsonElement implements Serializable
+public abstract class JsonElement implements Cloneable, Serializable
 {
 	private static final long serialVersionUID = 8291596876632597802L;
 	
@@ -143,9 +143,15 @@ public abstract class JsonElement implements Serializable
 		return delayedString != null;
 	}
 	
+	/**
+	 * Returns the string being stored by this element if it's delayed.
+	 * @return This element's string if delayed, otherwise <code>null</code>.
+	 */
 	protected String getDelayedString()
 	{
-		return delayedString.substring(delayedIndex, delayedIndex+getRawLength(delayedString, delayedIndex));
+		if(isParsingDelayed())
+			return delayedString.substring(delayedIndex, delayedIndex+getRawLength(delayedString, delayedIndex));
+		return null;
 	}
 	
 	/**************************
@@ -157,11 +163,11 @@ public abstract class JsonElement implements Serializable
 	 * Equivalent to @link #getJSON().
 	 * @return The JSON formatted element
 	 */
-	/*@Override
+	@Override
 	public String toString()
 	{
 		return getJSON();
-	}*/
+	}
 	
 	/**
 	 * Returns this element and its contents in JSON format.<br>
@@ -183,4 +189,48 @@ public abstract class JsonElement implements Serializable
 	 * @return The JSON formatted element
 	 */
 	protected abstract String toJSON();
+	
+	/********************
+	 * Object overrides *
+	 ********************/
+	
+	/**
+	 * Checks whether this element and the given element are equal.
+	 * Two elements are equal if and only if they are delayed and represented by identical delayed strings.
+	 * Other element states cannot reliably be used to determine equality.
+	 * 
+	 * @param o The element to check against.
+	 * @return <code>true</code> if the two elements are equal, otherwise <code>false</code>.
+	 * 
+	 * @see #getDelayedString()
+	 */
+	@Override
+	public boolean equals(Object o)
+	{
+		if(o == null || !(o instanceof JsonElement))
+			return false;
+		
+		JsonElement e = (JsonElement)o;
+		if(isParsingDelayed() && e.isParsingDelayed())
+			return getDelayedString().equals(e.getDelayedString());
+		return false;
+	}
+	
+	/**
+	 * If this element is delayed, returns the hash code of its delayed string.
+	 * Otherwise the default hash code method is used.
+	 * 
+	 * @return The element's hash code.
+	 * 
+	 * @see #getDelayedString()
+	 * @see String#hashCode()
+	 * @see Object#hashCode()
+	 */
+	@Override
+	public int hashCode()
+	{
+		if(isParsingDelayed())
+			return getDelayedString().hashCode();
+		return super.hashCode();
+	}
 }

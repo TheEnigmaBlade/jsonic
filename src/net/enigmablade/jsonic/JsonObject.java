@@ -11,12 +11,12 @@ import net.enigmablade.jsonic.ValueUtil.*;
  * 
  * @author Enigma
  */
-public class JsonObject extends JsonElement
+public class JsonObject extends JsonElement implements Cloneable
 {
 	private static final long serialVersionUID = -212184197241566516L;
 	
 	//Object data
-	private Map<String, Value> values;
+	private HashMap<String, Value> values;
 	
 	/*********************************
 	 * Constructors for JSON Creation*
@@ -521,7 +521,10 @@ public class JsonObject extends JsonElement
 	 */
 	public Integer getInt(String key)
 	{
-		return getLong(key).intValue();
+		Long l = getLong(key);
+		if(l == null)
+			return null;
+		return l.intValue();
 	}
 	
 	/**
@@ -554,7 +557,10 @@ public class JsonObject extends JsonElement
 	 */
 	public Float getFloat(String key)
 	{
-		return getDouble(key).floatValue();
+		Double d = getDouble(key);
+		if(d == null)
+			return null;
+		return d.floatValue();
 	}
 	
 	/**
@@ -626,14 +632,14 @@ public class JsonObject extends JsonElement
 		return json.toString();
 	}
 	
+	//Helper methods for building the object string
+	
 	private StringBuilder getJSONHelper()
 	{
 		StringBuilder json = new StringBuilder();
 		int n = 0;
 		for(String key : values.keySet())
-		{
 			appendValue(json, key, n++);
-		}
 		return json;
 	}
 	
@@ -663,5 +669,58 @@ public class JsonObject extends JsonElement
 		
 		if(index < values.size()-1)
 			json.append(ParserUtil.SPLIT);
+	}
+	
+	/********************
+	 * Object overrides *
+	 ********************/
+	
+	/**
+	 * Checks whether this array and and its contents are equal.
+	 * If parsing is delayed, uses the same method as in JsonElement.
+	 * 
+	 * @param o The array to check against.
+	 * @return <code>true</code> if the two arrays are equal, otherwise <code>false</code>.
+	 * 
+	 * @see JsonElement#equals(Object)
+	 */
+	@Override
+	public boolean equals(Object o)
+	{
+		if(o == null || !(o instanceof JsonObject))
+			return false;
+		
+		JsonObject j = (JsonObject)o;
+		return values.equals(j.values);
+	}
+	
+	/**
+	 * Returns the hash code of this JSON object, which is equivalent to the sum of the hash codes of each entry.
+	 * 
+	 * @returns This object's hash code.
+	 * 
+	 * @see Map#hashCode()
+	 */
+	@Override
+	public int hashCode()
+	{
+		return values.hashCode();
+	}
+	
+	/**
+	 * Clones this object based on HashMap's clone method.
+	 * If parsed, the map will be "shallow copied".
+	 * 
+	 * @return The cloned object.
+	 * 
+	 * @see HashMap#clone()
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	public Object clone() throws CloneNotSupportedException
+	{
+		JsonObject newArray = (JsonObject)super.clone();
+		newArray.values = (HashMap<String, Value>)values.clone();
+		return newArray;
 	}
 }
