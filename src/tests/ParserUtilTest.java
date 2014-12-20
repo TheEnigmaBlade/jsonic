@@ -26,6 +26,8 @@ public class ParserUtilTest extends ParserUtil
 		assertEquals(new Long(-21), parseUnknown("-21").value);
 		assertEquals(new Long(-321), parseUnknown("-321").value);
 		assertEquals(new Long(-4321), parseUnknown("-4321").value);
+		assertEquals(new Long((long)2e3), parseUnknown("2e3").value);
+		assertEquals(new Long((long)2e12), parseUnknown("2e12").value);
 		
 		assertEquals(new Double(0.0), parseUnknown("0.0").value);
 		assertEquals(new Double(1.1), parseUnknown("1.1").value);
@@ -36,6 +38,10 @@ public class ParserUtilTest extends ParserUtil
 		assertEquals(new Double(-21.89), parseUnknown("-21.89").value);
 		assertEquals(new Double(-321.789), parseUnknown("-321.789").value);
 		assertEquals(new Double(-4321.6789), parseUnknown("-4321.6789").value);
+		assertEquals(new Double(0.2e3), parseUnknown("0.2e3").value);
+		assertEquals(new Double(2.1e11), parseUnknown("2.1e11").value);
+		assertEquals(new Double(2e-1), parseUnknown("2e-1").value);
+		assertEquals(new Double(2e-11), parseUnknown("2e-11").value);
 	}
 	
 	@Test

@@ -27,7 +27,7 @@ public class ParserUtil
 	
 	protected static final char NEGATION = '-';
 	protected static final char FLOATING_POINT_SEPARATOR = '.';
-	protected static final char SCI_NOTATION = 'e';
+	protected static final char SCI_NOTATION = 'e', SCI_NOTATION_U = 'E';
 	protected static final char NUMBER_SPACER = '_';
 	
 	
@@ -150,7 +150,7 @@ public class ParserUtil
 			
 			//A number
 			default:
-				boolean hasDecimal = false, hasSci = false, negated = false;
+				boolean hasDecimal = false, hasSci = false, negated = false, sciNegated = false;
 				long total = 0, totalSci = 0;
 				for(int n = 0; n < str.length(); n++)
 				{
@@ -160,8 +160,14 @@ public class ParserUtil
 						//Negative
 						case NEGATION:
 							if(hasSci)
+							{
+								if(totalSci > 0 || sciNegated)
+									break NaN;
+								sciNegated = true;
 								break;
-							if(n > 0)
+							}
+							
+							if(n > 0 || negated)
 								break NaN;
 							negated = true;
 							break;
@@ -176,6 +182,7 @@ public class ParserUtil
 						
 						//Scientific notation
 						case SCI_NOTATION:
+						case SCI_NOTATION_U:
 							hasSci = true;
 							break;
 						
@@ -196,20 +203,21 @@ public class ParserUtil
 							}
 							
 							total *= 10;
-							total += c - '0';
+							total += '0' - c;
 							break;
 					}
 				}
 				
 				//Return a double if a decimal was found
-				if(hasDecimal)
+				if(hasDecimal || sciNegated)
 					return ValueUtil.createValue(Double.parseDouble(str));
 				//Otherwise return a long
 				if(hasSci)
 				{
-					total *= totalSci;
+					for(int p = 0; p > totalSci; p--)
+						total *= 10;
 				}
-				return ValueUtil.createValue(total);//Long.parseLong(str));//ValueUtil.createValue(Long.parseLong(str));
+				return ValueUtil.createValue(negated ? total : -total);
 		}
 		
 		throw new JsonParseException(JsonParseException.Type.UNKNOWN_VALUE_TYPE, str);
