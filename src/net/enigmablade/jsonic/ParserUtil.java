@@ -25,8 +25,10 @@ public class ParserUtil
 		return c == STRING_1 || c == STRING_2;
 	}
 	
+	protected static final char NEGATION = '-';
 	protected static final char FLOATING_POINT_SEPARATOR = '.';
-	protected static final char NUMBER_SPACER_1 = ',', NUMBER_SPACER_2 = '_';
+	protected static final char SCI_NOTATION = 'e';
+	protected static final char NUMBER_SPACER = '_';
 	
 	
 	//String navigation
@@ -124,29 +126,46 @@ public class ParserUtil
 		{
 			//True
 			case 't':
-				if(str.length() == 4 && str.charAt(1) == 'r' && str.charAt(2) == 'u' && str.charAt(3) == 'e')
+				if("true".equals(str))
 					return ValueUtil.createValue(true);
 				break;
 			
 			//False
 			case 'f':
-				if(str.length() == 5 && str.charAt(1) == 'a' && str.charAt(2) == 'l' && str.charAt(3) == 's' && str.charAt(4) == 'e')
+				if("false".equals(str))
 					return ValueUtil.createValue(false);
 				break;
 			
 			//Null
 			case 'n':
-				if(str.length() == 4 && str.charAt(1) == 'u' && str.charAt(2) == 'l' && str.charAt(3) == 'l')
+				if("null".equals(str))
 					return ValueUtil.createNullValue();
+				break;
+			
+			//NaN (the actual value)
+			case 'N':
+				if("NaN".equals(str))
+					return ValueUtil.andThenThereWereNaN();
 				break;
 			
 			//A number
 			default:
-				boolean hasDecimal = false;
-				for(char c : str.toCharArray())
+				boolean hasDecimal = false, hasSci = false, negated = false;
+				long total = 0, totalSci = 0;
+				for(int n = 0; n < str.length(); n++)
 				{
+					char c = str.charAt(n);
 					switch(c)
 					{
+						//Negative
+						case NEGATION:
+							if(hasSci)
+								break;
+							if(n > 0)
+								break NaN;
+							negated = true;
+							break;
+						
 						//Decimal
 						case FLOATING_POINT_SEPARATOR:
 							//Can't have two decimal points, NaN
@@ -155,15 +174,30 @@ public class ParserUtil
 							hasDecimal = true;
 							break;
 						
+						//Scientific notation
+						case SCI_NOTATION:
+							hasSci = true;
+							break;
+						
 						//Spacers, ignore
-						case NUMBER_SPACER_1:
-						case NUMBER_SPACER_2:
+						case NUMBER_SPACER:
 							break;
 						
 						//Check if valid digit
 						default:
-							if(c < '0' && c > '9')
+							if(c < '0' || c > '9')
 								break NaN;
+							
+							if(hasSci)
+							{
+								totalSci *= 10;
+								totalSci += '0' - c;
+								break;
+							}
+							
+							total *= 10;
+							total += c - '0';
+							break;
 					}
 				}
 				
@@ -171,7 +205,11 @@ public class ParserUtil
 				if(hasDecimal)
 					return ValueUtil.createValue(Double.parseDouble(str));
 				//Otherwise return a long
-				return ValueUtil.createValue(Long.parseLong(str));
+				if(hasSci)
+				{
+					total *= totalSci;
+				}
+				return ValueUtil.createValue(total);//Long.parseLong(str));//ValueUtil.createValue(Long.parseLong(str));
 		}
 		
 		throw new JsonParseException(JsonParseException.Type.UNKNOWN_VALUE_TYPE, str);

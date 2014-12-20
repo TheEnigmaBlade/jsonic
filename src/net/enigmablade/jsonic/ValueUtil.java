@@ -18,7 +18,7 @@ public class ValueUtil
 	 * DOES NOT TYPE-CHECK and assumes value is non-null unless the type is NULL.
 	 * @author EnigmaBlade
 	 */
-	protected static class Value
+	public static class Value
 	{
 		/**
 		 * The value type.
@@ -53,13 +53,13 @@ public class ValueUtil
 		{
 			switch(type)
 			{
-				case NULL: 
+				case NULL:
 					return "null";
 					
-				case STRING: 
+				case STRING:
 					return new StringBuilder().append(ParserUtil.STRING_1).append(value).append(ParserUtil.STRING_1).toString();
 					
-				default: 
+				default:
 					return value.toString();
 			}
 		}
@@ -95,6 +95,11 @@ public class ValueUtil
 	protected static Value createNullValue()
 	{
 		return new Value(ValueType.NULL, null);
+	}
+	
+	protected static Value andThenThereWereNaN()
+	{
+		return new Value(ValueType.DOUBLE, Double.NaN);
 	}
 	
 	protected static Value createValue(JsonObject value)

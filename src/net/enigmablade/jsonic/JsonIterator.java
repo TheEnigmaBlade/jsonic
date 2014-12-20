@@ -1,6 +1,7 @@
 package net.enigmablade.jsonic;
 
 import java.util.*;
+import java.util.function.*;
 
 /**
  * An iterator for use with JSON arrays.
@@ -75,5 +76,12 @@ public class JsonIterator implements Iterator<Object>
 	public void remove()
 	{
 		array.remove((counter = counter-1));
+	}
+
+	@Override
+	public void forEachRemaining(Consumer<? super Object> c)
+	{
+		while(hasNext())
+			c.accept(next());
 	}
 }

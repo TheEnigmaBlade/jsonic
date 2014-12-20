@@ -15,6 +15,8 @@ public abstract class JsonElement implements Cloneable, Serializable
 	private String delayedString = null;
 	private int delayedIndex = -1;
 	
+	private char openingChar, closingChar;
+	
 	//Other info
 	private int length = -1;
 	
@@ -24,10 +26,15 @@ public abstract class JsonElement implements Cloneable, Serializable
 	
 	/**
 	 * Creates an empty JsonElement.
+	 * @param openChar The first char of the element
+	 * @param closingChar The last char of the element
 	 */
-	public JsonElement()
+	public JsonElement(char openChar, char closingChar)
 	{
 		delayedString = null;
+		
+		this.openingChar = openChar;
+		this.closingChar = closingChar;
 	}
 	
 	/**
@@ -42,6 +49,9 @@ public abstract class JsonElement implements Cloneable, Serializable
 		
 		delayedString = e.delayedString;
 		delayedIndex = e.delayedIndex;
+		
+		openingChar = e.openingChar;
+		closingChar = e.closingChar;
 	}
 	
 	/*********************************
@@ -53,11 +63,15 @@ public abstract class JsonElement implements Cloneable, Serializable
 	 * @param str The string to parse
 	 * @param startIndex The starting index of the element in the string
 	 * @param delayed Whether or not the parsing is delayed
+	 * @param openChar The first char of the element
+	 * @param closingChar The last char of the element
 	 * @throws JsonParseException if there was an error when parsing the string
 	 * @throws IllegalArgumentException if the string is null
 	 */
-	protected JsonElement(String str, int startIndex, boolean delayed) throws JsonParseException
+	protected JsonElement(String str, int startIndex, boolean delayed, char openChar, char closingChar) throws JsonParseException
 	{
+		this(openChar, closingChar);
+		
 		if(str == null)
 			throw new IllegalArgumentException("The JSON string cannot be null");
 		
@@ -116,12 +130,36 @@ public abstract class JsonElement implements Cloneable, Serializable
 	}
 	
 	/**
-	 * To be overridden to provide the raw (character) length of the element starting at the starting index.
+	 * Returns the raw (character) length of the object, starting at the starting index.
 	 * @param json The JSON being checked
 	 * @param startIndex The starting index in the JSON
-	 * @return The raw length
+	 * @return The length of the object
+	 * @see JsonElement#getRawLength(String, int)
 	 */
-	protected abstract int getRawLength(String json, int startIndex);
+	private int getRawLength(String json, int startIndex)
+	{
+		char c;
+		int n = 1, objCount = 0;
+		for(; startIndex < json.length(); startIndex++, n++)
+		{
+			c = json.charAt(startIndex);
+			
+			if(c == closingChar)
+				objCount--;
+			else if(c == openingChar)
+				objCount++;
+			
+			if(objCount <= 0)
+				break;
+		}
+		
+		//Not all elements were closed (UH OH!)
+		if(objCount > 0)
+			return 0;
+		
+		//Otherwise return the length
+		return n;
+	}
 	
 	/**
 	 * Verifies this element is parsed and otherwise parses it.

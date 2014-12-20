@@ -1,6 +1,7 @@
 package net.enigmablade.jsonic;
 
 import java.util.*;
+import java.util.function.*;
 import net.enigmablade.jsonic.ValueUtil.*;
 
 /**
@@ -40,7 +41,7 @@ public class JsonArray extends JsonElement implements Iterable<Object>, Cloneabl
 	 */
 	public JsonArray(int initialCapacity)
 	{
-		super();
+		super(ParserUtil.ARRAY_OPEN, ParserUtil.ARRAY_CLOSE);
 		setup(initialCapacity);
 	}
 	
@@ -70,7 +71,7 @@ public class JsonArray extends JsonElement implements Iterable<Object>, Cloneabl
 	 */
 	protected JsonArray(String arrayStr, int startIndex, boolean delayed) throws JsonParseException
 	{
-		super(arrayStr, startIndex, delayed);
+		super(arrayStr, startIndex, delayed, ParserUtil.ARRAY_OPEN, ParserUtil.ARRAY_CLOSE);
 	}
 	
 	/*******************
@@ -136,15 +137,15 @@ public class JsonArray extends JsonElement implements Iterable<Object>, Cloneabl
 			switch(startChar)
 			{
 				//String
-				case ParserUtil.STRING_1: 
-				case ParserUtil.STRING_2: 
+				case ParserUtil.STRING_1:
+				case ParserUtil.STRING_2:
 					String str = ParserUtil.getStringBlock(json, index);
 					value = ValueUtil.createValue(str);
 					index += str.length()+2;
 					break;
 				
 				//Object
-				case ParserUtil.OBJECT_OPEN: 
+				case ParserUtil.OBJECT_OPEN:
 					JsonObject object = new JsonObject(json, index, delayed);
 					value = ValueUtil.createValue(object);
 					if((len = object.getRawLength()) < 2)
@@ -156,7 +157,7 @@ public class JsonArray extends JsonElement implements Iterable<Object>, Cloneabl
 					throw new JsonParseException(JsonParseException.Type.INVALID_FORMAT, index);
 				
 				//Array
-				case ParserUtil.ARRAY_OPEN: 
+				case ParserUtil.ARRAY_OPEN:
 					JsonArray array = new JsonArray(json, index, delayed);
 					value = ValueUtil.createValue(array);
 					if((len = array.getRawLength()) < 2)
@@ -165,7 +166,7 @@ public class JsonArray extends JsonElement implements Iterable<Object>, Cloneabl
 					break;
 				
 				//Unknown: boolean, number, or null
-				default: 
+				default:
 					String valueStr = ParserUtil.getUnknownBlock(json, index);
 					value = ParserUtil.parseUnknown(valueStr);
 					index += valueStr.length();
@@ -182,33 +183,6 @@ public class JsonArray extends JsonElement implements Iterable<Object>, Cloneabl
 			throw new JsonParseException(JsonParseException.Type.BAD_END, index);
 		
 		return index-startIndex+1;
-	}
-	
-	/**
-	 * Returns the raw (character) length of the array, starting at the starting index.
-	 * @param json The JSON being checked
-	 * @param startIndex The starting index in the JSON
-	 * @return The length of the array
-	 * @see JsonElement#getRawLength(String, int)
-	 */
-	@Override
-	protected int getRawLength(String json, int startIndex)
-	{
-		char c;
-		int n = 1;
-		for(int objCount = 0; startIndex < json.length(); startIndex++, n++)
-		{
-			c = json.charAt(startIndex);
-			
-			if(c == ParserUtil.ARRAY_CLOSE)
-				objCount--;
-			else if(c == ParserUtil.ARRAY_OPEN)
-				objCount++;
-			
-			if(objCount <= 0)
-				break;
-		}
-		return n;
 	}
 	
 	/********************
@@ -499,7 +473,7 @@ public class JsonArray extends JsonElement implements Iterable<Object>, Cloneabl
 	 * Removes and returns the value at the specified index.
 	 * @param index The index of the value to be removed
 	 * @return The removed value
-	 * @throws JsonException if an exception occurred during parsing 
+	 * @throws JsonException if an exception occurred during parsing
 	 * @throws IndexOutOfBoundsException if the index is out of range (<tt>index &lt; 0 || index &gt;= size()</tt>)
 	 */
 	public Object remove(int index)
@@ -520,6 +494,7 @@ public class JsonArray extends JsonElement implements Iterable<Object>, Cloneabl
 	 * Returns an iterator for this array.
 	 * @return An iterator.
 	 */
+	@Override
 	public JsonIterator iterator()
 	{
 		return new JsonIterator(this);
@@ -544,7 +519,7 @@ public class JsonArray extends JsonElement implements Iterable<Object>, Cloneabl
 			if(value == null)
 				json.append("null");
 			else
-				json.append(values.toString());
+				json.append(value.toString());
 			
 			if(n < values.size()-1)
 				json.append(ParserUtil.SPLIT);
@@ -604,5 +579,17 @@ public class JsonArray extends JsonElement implements Iterable<Object>, Cloneabl
 		JsonArray newArray = (JsonArray)super.clone();
 		newArray.values = (ArrayList<Value>)values.clone();
 		return newArray;
+	}
+
+	@Override
+	public void forEach(Consumer<? super Object> c)
+	{
+		values.forEach(c);
+	}
+
+	@Override
+	public Spliterator<Object> spliterator()
+	{
+		throw new IllegalStateException("Not implemented");
 	}
 }

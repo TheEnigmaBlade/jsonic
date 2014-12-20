@@ -27,7 +27,7 @@ public class JsonObject extends JsonElement implements Cloneable
 	 */
 	public JsonObject()
 	{
-		super();
+		super(ParserUtil.OBJECT_OPEN, ParserUtil.OBJECT_CLOSE);
 		setup();
 	}
 	
@@ -57,7 +57,7 @@ public class JsonObject extends JsonElement implements Cloneable
 	 */
 	protected JsonObject(String objStr, int startIndex, boolean delayed) throws JsonParseException
 	{
-		super(objStr, startIndex, delayed);
+		super(objStr, startIndex, delayed, ParserUtil.OBJECT_OPEN, ParserUtil.OBJECT_CLOSE);
 	}
 	
 	/*******************
@@ -200,40 +200,6 @@ public class JsonObject extends JsonElement implements Cloneable
 			throw new JsonParseException(JsonParseException.Type.BAD_END, index);
 		
 		return index-startIndex+1;
-	}
-	
-	/**
-	 * Returns the raw (character) length of the object, starting at the starting index.
-	 * @param json The JSON being checked
-	 * @param startIndex The starting index in the JSON
-	 * @return The length of the object
-	 * @see JsonElement#getRawLength(String, int)
-	 */
-	@Override
-	protected int getRawLength(String json, int startIndex)
-	{
-		char c;
-		
-		int n = 1, objCount = 0;
-		for(; startIndex < json.length(); startIndex++, n++)
-		{
-			c = json.charAt(startIndex);
-			
-			if(c == ParserUtil.OBJECT_CLOSE)
-				objCount--;
-			else if(c == ParserUtil.OBJECT_OPEN)
-				objCount++;
-			
-			if(objCount <= 0)
-				break;
-		}
-		
-		//Not all elements were closed (UH OH!)
-		if(objCount > 0)
-			return 1;
-		
-		//Otherwise return the length
-		return n;
 	}
 	
 	/********************
